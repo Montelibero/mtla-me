@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Information</title>
+</head>
+
+<body>
+    <h1>Link Information</h1>
+    <p>Loading link information...</p>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/11.1.0/stellar-sdk.min.js" integrity="sha512-eAiqiSoNROitbaQJ2UXQ8I6I89mZUIXJCgh+oUqbE9dmRULEKsOvqDb8ChVbrbkhAH92+XNFd/mLfn6GCQtkuw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script type="text/javascript">
+        const urlParts = window.location.pathname.split("/");
+        const accountId = urlParts[urlParts.length - 2];
+        const linkNumber = urlParts[urlParts.length - 1];
+
+        const server = new StellarSdk.Server("https://horizon.stellar.org");
+
+        server.accounts()
+            .accountId(accountId)
+            .call()
+            .then(account => {
+                document.querySelector("h1").textContent = `Link ${linkNumber} Information`;
+
+                const linkKey = `link ${linkNumber}`;
+                const linkValue = account.data[linkKey];
+
+                const element = document.createElement("div");
+                element.textContent = `${linkKey}: ${linkValue}`;
+                document.querySelector("body").appendChild(element);
+            })
+            .catch(error => {
+                console.error("Error fetching link information:", error);
+                document.querySelector("p").textContent = "Error: Failed to retrieve link information.";
+            });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Information</title>
+</head>
+
+<body>
+    <h1>Account Information</h1>
+    <p>Loading account information...</p>
+
+    <!-- https://stellar.github.io/js-stellar-sdk/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/11.1.0/stellar-sdk.min.js" integrity="sha512-eAiqiSoNROitbaQJ2UXQ8I6I89mZUIXJCgh+oUqbE9dmRULEKsOvqDb8ChVbrbkhAH92+XNFd/mLfn6GCQtkuw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        console.log(StellarSdk);
+        // TODO TypeError: undefined is not a constructor (evaluating 'new StellarSdk.Server("https://horizon.stellar.org")')
+        const server = new StellarSdk.Server("https://horizon.stellar.org");
+        const accountId = window.location.pathname.match(/\/account\/([0-9a-zA-Z]+)/)[1];
+
+        server.accounts.account(accountId)
+            .then(account => {
+                // Display account information
+                document.querySelector("h1").textContent = account.accountId;
+
+                const data = account.data;
+
+                // Display data fields
+                for (const key in data) {
+                    const value = data[key];
+
+                    const element = document.createElement("div");
+                    element.textContent = `${key}: ${value}`;
+
+                    document.querySelector("body").appendChild(element);
+                }
+
+                // Add links to "link" fields
+                for (const key in data) {
+                    const value = data[key];
+
+                    if (key.startsWith("link")) {
+                        const number = key.split(" ")[1];
+
+                        const link = document.createElement("a");
+                        link.href = `/account/${accountId}/${number}`;
+                        link.textContent = value;
+
+                        document.querySelector("body").appendChild(link);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching account information:", error);
+                document.querySelector("p").textContent = "Error: Failed to retrieve account information.";
+            });
+    </script>
+</body>
+
+</html>
