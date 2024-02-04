@@ -1,6 +1,6 @@
 <h1 align="center">MTLA.me</h1>
 
-Live: https://mtla.me
+Live: [mtla.me](https://mtla.me)
 
 The repository is a part of the [Montelibero Association](https://github.com/MTL-Association). This project and everyone participating in it is governed by the [Code of Conduct](CODE_OF_CONDUCT.md).
 
