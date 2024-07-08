@@ -1,18 +1,9 @@
 theme: jekyll-theme-cayman
-include: [".well-known", "./account.html"]
+include: [".well-known"]
 
-repository: MTL-Association/mtla.github.io
+repository: Montelibero/mtla-me
 baseurl: ""
 url: "https://mtla.me"
 
 timezone: UTC
 encoding: "utf-8"
-
-# Plugins
-plugins:
-  - jekyll-multiple-languages-plugin
-
-# jekyll-multiple-languages-plugin settings:
-languages: ["en", "eo", "ru", "uk"]
-
-exclude_from_localizations: ["assets", "_sass", "_layouts", "_includes"]
