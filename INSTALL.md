@@ -1,48 +1,70 @@
-# Installation
+# Deployment
 
-Please read through our [Contributing Guidelines](CONTRIBUTING.md).
+## Method 1: GitHub Pages (automatic)
 
-## General setup
+**The easiest way is to deploy automatically with every push:**
 
-#### Using Docker (easy way)
+1. Upload your code to the GitHub repository
+2. Go to **Settings → Pages**
+3. In the **Source** section, select **GitHub Actions**
+4. Done! Every time you push to `new`, the site will be automatically updated
 
-- Install [Docker](https://www.docker.com)
-- Run `docker-compose up -d`
+The workflow is already configured in `.github/workflows/deploy.yml`
 
-The website can be accessed at http://localhost:4000.
+**URL update (canonical):**
 
-#### Without Docker (advanced way)
-
-- Install [Ruby](https://www.ruby-lang.org/en/documentation/installation/)
-- Install [Bundler](https://bundler.io)
-- Install [Jekyll](https://jekyllrb.com/docs/installation/)
-
-Before you start, install dependencies:
-
+If you use a custom domain (like `new.mtla.me`), set canonical in `i18n/<lang>/index.html` to the custom domain:
+```html
+<link rel="canonical" href="https://new.mtla.me/en/">
 ```
-bundle install
-```
+Do the same for other languages (`/ru/`, `/es/`, `/sr/`, etc).
 
-Start development server:
-
-```
-bundle exec jekyll serve
+If you do NOT use a custom domain, set canonical to the GitHub Pages URL:
+```html
+<link rel="canonical" href="https://<username>.github.io/<repository>/en/">
 ```
 
-The website can be accessed at http://localhost:4000.
+## Method 2: GitHub Pages (manual)
 
-In case you need to rebuild the website:
+1. Upload all files to the root of the repository
+2. Go to **Settings → Pages**
+3. In the **Source** section, select the `new` branch and the `/ (root)` folder
+4. Save your changes
+5. The site is available at `https://<username>.github.io/<repository>/`
 
+## Method 3: Docker (locally or on a server)
+
+**Docker:**
+```bash
+# Build the image
+docker build -t mtla-landing .
+
+# Run the container
+docker run -d -p 8080:80 --name mtla-landing mtla-landing
+
+# Open in browser: http://localhost:8080
 ```
-bundle exec jekyll build
+
+Note: The Docker build synchronizes `i18n/<lang>` into `/<lang>` (like CI and `serve.sh`). If you edit files in `i18n/*`, rebuilding the image is enough — no manual copy is needed.
+
+**Docker Compose:**
+```bash
+# Start
+docker-compose up -d
+
+# Stop
+docker-compose down
+
+# Open in browser: http://localhost:8080
 ```
 
-In case you need to update dependencies:
+**Deployment on the server:**
+```bash
+# On a server with Docker
+git clone https://github.com/<username>/<repository>.git
+cd <repository>
+docker-compose up -d
 
+# With Nginx reverse proxy, add the configuration
+# for proxying to port 8080
 ```
-bundle update listen
-```
-
-## Additional information
-
-- [Testing your GitHub Pages site locally with Jekyll](https://help.github.com/en/articles/testing-your-github-pages-site-locally-with-jekyll)

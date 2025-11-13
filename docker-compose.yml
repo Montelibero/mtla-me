@@ -1,12 +1,9 @@
-version: '3'
+version: '3.8'
 
 services:
-  site:
-    image: jekyll/jekyll:4.2.2
-    command: jekyll serve --verbose
-    container_name: 'mtla-me'
+  mtla-web:
+    build: .
+    container_name: mtla-landing
     ports:
-      - 4000:4000
-    volumes:
-      - .:/srv/jekyll
-      - ./vendor/bundle:/usr/local/bundle
+      - "8080:80"
+    restart: unless-stopped

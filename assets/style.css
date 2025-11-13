@@ -1,0 +1,196 @@
+:root {
+  --max: 840px;
+  --pad: 1rem;
+  --accent: #DBB544;
+  --bg: #0b0e0e;
+  --text: #e6e6e6;
+  --muted: #a0a5a5;
+  --line: rgba(219,181,68,.28);
+  --radius: 6px;
+  --radius-sm: 4px;
+  --shadow: 0 0 0 1px rgba(219,181,68,.15), 0 10px 30px rgba(0,0,0,.45);
+  --glow: 0 0 12px rgba(219,181,68,.45), 0 0 28px rgba(219,181,68,.25);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  line-height: 1.6;
+  color: var(--text);
+  background-color: var(--bg);
+  background-image: radial-gradient(1200px 600px at 25% -10%, rgba(219,181,68,.08), transparent 60%),
+    radial-gradient(800px 400px at 120% 20%, rgba(219,181,68,.06), transparent 65%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 3px);
+  background-attachment: fixed;
+}
+
+.wrap { max-width: var(--max); margin: 0 auto; padding: var(--pad); }
+
+.hero, section {
+  padding: 2rem 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.hero {
+  padding: 2.5rem 1.5rem;
+  background: linear-gradient(165deg, rgba(219,181,68,.06), transparent);
+  text-align: center;
+}
+
+.hero h1, section h2 { margin-top: 0; }
+
+.lead { font-size: 1.125rem; color: var(--muted); }
+
+section {
+  margin: 2rem 0;
+  background: linear-gradient(165deg, rgba(219,181,68,.03), transparent);
+}
+
+.nav-links {
+  display: flex;
+  gap: .6rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+  justify-content: center;
+}
+
+.nav-links a {
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: .4rem .7rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-size: .85rem;
+  text-decoration: none;
+  transition: all .15s;
+}
+
+.nav-links a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(219,181,68,.25) inset;
+}
+
+h1, h2, h3 {
+  margin: 1.2em 0 .5em;
+  line-height: 1.15;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+p { margin: 0 0 1rem; }
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px dotted;
+}
+
+a:hover { text-shadow: 0 0 1px; }
+
+small { color: var(--muted); }
+
+/* Language dropdown */
+.lang {
+  position: fixed;
+  top: .75rem;
+  right: .75rem;
+  z-index: 1000;
+}
+
+.lang-current {
+  padding: .5rem .8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+
+.lang-current:after {
+  content: "▼";
+  font-size: .7rem;
+  color: var(--muted);
+}
+
+.lang:hover .lang-current,
+.lang:focus-within .lang-current {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.lang-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: .3rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  min-width: 150px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: opacity .2s, transform .2s, visibility .2s;
+}
+
+.lang:hover .lang-menu,
+.lang:focus-within .lang-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.lang-menu a {
+  display: block;
+  padding: .6rem 1rem;
+  color: var(--text);
+  border-bottom: 1px solid var(--line);
+  transition: background .15s;
+}
+
+.lang-menu a:last-child { border-bottom: 0; }
+
+.lang-menu a:hover {
+  background: rgba(219,181,68,.08);
+  color: var(--accent);
+}
+
+header.wrap { padding: 0; height: 0; margin: 0; }
+
+.btn {
+  display: inline-block;
+  padding: .6rem 1rem;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  background: transparent;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+  transition: transform .12s, box-shadow .12s;
+  box-shadow: 0 0 0 1px rgba(219,181,68,.15) inset;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, rgba(219,181,68,.12), rgba(219,181,68,.06));
+  box-shadow: var(--glow);
+}
+
+.btn:active { transform: translateY(0); }
+
+.markdown { margin: 1.5rem 0; }
+.markdown p { margin: .5rem 0 .9rem; }
+.markdown ol, .markdown ul { padding-left: 1.2rem; }
+.markdown li { margin: .25rem 0; }
