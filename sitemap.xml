@@ -3,7 +3,11 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://mtla.me/</loc>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mtla.me/en/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mtla.me/ru/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mtla.me/es/"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://mtla.me/sr/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/en/"/>
   </url>
   <url>
     <loc>https://mtla.me/en/</loc>
@@ -11,7 +15,7 @@
     <xhtml:link rel="alternate" hreflang="ru" href="https://mtla.me/ru/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://mtla.me/es/"/>
     <xhtml:link rel="alternate" hreflang="sr" href="https://mtla.me/sr/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/en/"/>
   </url>
   <url>
     <loc>https://mtla.me/ru/</loc>
@@ -19,7 +23,7 @@
     <xhtml:link rel="alternate" hreflang="ru" href="https://mtla.me/ru/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://mtla.me/es/"/>
     <xhtml:link rel="alternate" hreflang="sr" href="https://mtla.me/sr/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/en/"/>
   </url>
   <url>
     <loc>https://mtla.me/es/</loc>
@@ -27,7 +31,7 @@
     <xhtml:link rel="alternate" hreflang="ru" href="https://mtla.me/ru/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://mtla.me/es/"/>
     <xhtml:link rel="alternate" hreflang="sr" href="https://mtla.me/sr/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/en/"/>
   </url>
   <url>
     <loc>https://mtla.me/sr/</loc>
@@ -35,6 +39,6 @@
     <xhtml:link rel="alternate" hreflang="ru" href="https://mtla.me/ru/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://mtla.me/es/"/>
     <xhtml:link rel="alternate" hreflang="sr" href="https://mtla.me/sr/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/en/"/>
   </url>
 </urlset>
