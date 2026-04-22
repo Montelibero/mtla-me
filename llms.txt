@@ -1,0 +1,26 @@
+# Montelibero Association
+
+Canonical site: https://mtla.me/
+
+This is a static multilingual landing page for the Montelibero Association.
+
+Primary entry points:
+- Root: https://mtla.me/
+- English: https://mtla.me/en/
+- Russian: https://mtla.me/ru/
+- Spanish: https://mtla.me/es/
+- Montenegrin: https://mtla.me/sr/
+
+Key sections on each locale page:
+- Hero / overview of the Association
+- Agreement
+- Governance bodies
+- Documents and regulations
+- Link to the telegram bot for joining MTLA
+
+Canonical document pages live on docs.mtla.me:
+- See their file for LLMs: https://docs.mtla.me/llms.txt
+- Agreement (EN): https://docs.mtla.me/Agreement/Agreement.en.html
+- Participation regulations: https://docs.mtla.me/Participation/Participation.ru.html
+- Principles: https://docs.mtla.me/Principles/Principles.en.html
+- All docs in machine-readable registry: https://docs.mtla.me/data.json

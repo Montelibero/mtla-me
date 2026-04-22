@@ -38,8 +38,8 @@ function buildSite() {
   copyPublicAsset('.nojekyll');
   copyPublicAsset('robots.txt');
   copyPublicAsset('favicon.ico');
-  copyOptionalAsset('llms.txt');
-  copyOptionalAsset('sitemap.xml');
+  copyPublicAsset('llms.txt');
+  copyPublicAsset('sitemap.xml');
 
   for (const lang of SUPPORTED_LANGS) {
     const localeDir = path.join(outputDir, lang);
@@ -340,11 +340,4 @@ function copyPublicAsset(relativePath) {
   fs.cpSync(path.join(rootDir, relativePath), path.join(outputDir, relativePath), {
     recursive: true,
   });
-}
-
-function copyOptionalAsset(relativePath) {
-  const source = path.join(rootDir, relativePath);
-  if (fs.existsSync(source)) {
-    copyPublicAsset(relativePath);
-  }
 }

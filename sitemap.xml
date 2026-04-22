@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="https://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://mtla.me/</loc>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/"/>
+  </url>
+  <url>
+    <loc>https://mtla.me/en/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mtla.me/en/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mtla.me/ru/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mtla.me/es/"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://mtla.me/sr/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/"/>
+  </url>
+  <url>
+    <loc>https://mtla.me/ru/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mtla.me/en/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mtla.me/ru/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mtla.me/es/"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://mtla.me/sr/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/"/>
+  </url>
+  <url>
+    <loc>https://mtla.me/es/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mtla.me/en/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mtla.me/ru/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mtla.me/es/"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://mtla.me/sr/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/"/>
+  </url>
+  <url>
+    <loc>https://mtla.me/sr/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mtla.me/en/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mtla.me/ru/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mtla.me/es/"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://mtla.me/sr/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/"/>
+  </url>
+</urlset>
