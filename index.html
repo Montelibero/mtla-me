@@ -4,7 +4,42 @@
   <meta charset="utf-8">
   <title>Montelibero Association – Language selection</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script>window.SUPPORTED_LANGS = ['en','ru','es','sr'];</script>
+  <script>
+    window.SUPPORTED_LANGS = ['en', 'ru', 'es', 'sr'];
+    (function () {
+      try {
+        var supported = window.SUPPORTED_LANGS;
+        var url = new URL(window.location.href);
+        var explicit = url.searchParams.get('lang') || localStorage.getItem('lang');
+        var lang = null;
+
+        function pickLang(langs) {
+          for (var i = 0; i < langs.length; i++) {
+            var value = (langs[i] || '').toLowerCase();
+            var prefix = value.slice(0, 2);
+            if (supported.indexOf(value) >= 0) return value;
+            if (supported.indexOf(prefix) >= 0) return prefix;
+          }
+          return null;
+        }
+
+        lang = (explicit && supported.indexOf(explicit) >= 0)
+          ? explicit
+          : pickLang(navigator.languages || [navigator.language]) || supported[0];
+
+        localStorage.setItem('lang', lang);
+
+        var path = window.location.pathname.replace(/\/index\.html\/?$/, '/');
+        if (!path.endsWith('/')) path += '/';
+
+        if (!/\/(en|ru|es|sr)(\/|$)/.test(path)) {
+          window.location.replace(path + lang + '/');
+        }
+      } catch (e) {
+        // Fall back to the manual picker in <noscript>.
+      }
+    })();
+  </script>
 
   <link rel="alternate" hreflang="en" href="./en/">
   <link rel="alternate" hreflang="ru" href="./ru/">
@@ -14,20 +49,18 @@
 
   <link rel="stylesheet" href="./assets/style.css">
 </head>
-<body class="wrap">
-  <h1>Choose language</h1>
-  <p>If JavaScript is enabled, you’ll be redirected automatically.</p>
-
-  <section>
-    <p><strong>JavaScript is disabled.</strong> Please select language manually:</p>
-    <p>
-      <a hreflang="en" class="btn" href="./en/">English</a>
-      <a hreflang="ru" class="btn" href="./ru/">Русский</a>
-      <a hreflang="es" class="btn" href="./es/">Español</a>
-      <a hreflang="sr" class="btn" href="./sr/">Crnogorski</a>
-    </p>
-  </section>
-
-  <script src="./assets/app.js"></script>
+<body>
+  <noscript>
+    <main class="wrap">
+      <h1>Choose language</h1>
+      <p><strong>JavaScript is disabled.</strong> Please select language manually:</p>
+      <p>
+        <a hreflang="en" class="btn" href="./en/">English</a>
+        <a hreflang="ru" class="btn" href="./ru/">Русский</a>
+        <a hreflang="es" class="btn" href="./es/">Español</a>
+        <a hreflang="sr" class="btn" href="./sr/">Crnogorski</a>
+      </p>
+    </main>
+  </noscript>
 </body>
 </html>

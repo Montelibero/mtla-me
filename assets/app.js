@@ -1,39 +1,6 @@
 // assets/app.js
 (function () {
-  // --- A) Auto-redirect to preferred language (root index.html only)
-  var html = document.documentElement;
-  if (!html.hasAttribute('data-no-redirect')) {
-    try {
-      var SUPPORTED = window.SUPPORTED_LANGS || ['en', 'ru', 'es', 'sr'];
-      var url = new URL(location.href);
-      var explicit = url.searchParams.get('lang') || localStorage.getItem('lang');
-      var lang = null;
-
-      function pickLang(langs) {
-        for (var i = 0; i < langs.length; i++) {
-          var v = (langs[i] || '').toLowerCase();
-          var prefix = v.slice(0, 2);
-          if (SUPPORTED.indexOf(v) >= 0) return v;
-          if (SUPPORTED.indexOf(prefix) >= 0) return prefix;
-        }
-        return null;
-      }
-
-      lang = (explicit && SUPPORTED.indexOf(explicit) >= 0) 
-        ? explicit 
-        : pickLang(navigator.languages || [navigator.language]) || SUPPORTED[0];
-
-      localStorage.setItem('lang', lang);
-
-      var base = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/';
-      if (!/\/(en|ru|es|sr)(\/|$)/.test(base)) {
-        var norm = base.replace(/\/index\.html\/?$/, '/');
-        location.replace((norm.endsWith('/') ? norm : norm + '/') + lang + '/');
-      }
-    } catch (e) { /* fallback to noscript */ }
-  }
-
-  // --- B) Load Markdown with minimal parser
+  // --- Load Markdown with minimal parser
   function parseMd(md, baseUrl) {
     var esc = function(s) {
       return String(s).replace(/[&<>"']/g, function(c) {
