@@ -27,19 +27,8 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
       
-      - name: Build _site
-        run: |
-          mkdir -p _site
-          cp -R assets documents _site/
-          cp index.html CNAME .nojekyll robots.txt favicon.ico _site/
-
-          if [ -f llms.txt ]; then cp llms.txt _site/; fi
-          if [ -f sitemap.xml ]; then cp sitemap.xml _site/; fi
-
-          for dir in i18n/*/ ; do
-            lang="$(basename "$dir")"
-            cp -R "$dir" "_site/$lang"
-          done
+      - name: Build site
+        run: node scripts/build.mjs
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

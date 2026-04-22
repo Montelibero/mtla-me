@@ -1,0 +1,133 @@
+{
+  "lang": "sr",
+  "title": "Udruženje Montelibero",
+  "description": "Početna stranica Udruženja Montelibero.",
+  "ogLocale": "sr_Latn",
+  "currentLanguageLabel": "Crnogorski",
+  "languageSwitcherAriaLabel": "Izbor jezika",
+  "hero": {
+    "title": "Udruženje Montelibero",
+    "lead": "Vanteritorijalana ugovorna jurisdikcija",
+    "description": "Udruženje stvoreno za koordinaciju akcija u postizanju ciljeva pokreta Montelibero, čuvajući slobodu učesnika i ne tražeći isključivo predstavljanje interesa Pokreta.",
+    "joinLabel": "Pridružiti se",
+    "navLinks": [
+      {
+        "label": "Telegram",
+        "href": "https://t.me/mtl_association",
+        "external": true
+      },
+      {
+        "label": "Wiki",
+        "href": "https://monte.wiki/ru/%D0%90%D1%81%D1%81%D0%BE%D1%86%D0%B8%D0%B0%D1%86%D0%B8%D1%8F_%D0%9C%D0%BE%D0%BD%D1%82%D0%B5%D0%BB%D0%B8%D0%B1%D0%B5%D1%80%D0%BE",
+        "external": true
+      },
+      {
+        "label": "Stellar",
+        "href": "https://stellar.expert/explorer/public/account/GCNVDZIHGX473FEI7IXCUAEXUJ4BGCKEMHF36VYP5EMS7PX2QBLAMTLA",
+        "external": true
+      },
+      {
+        "label": "Sporazum",
+        "href": "#agreement"
+      },
+      {
+        "label": "Naši organi",
+        "href": "#bodies"
+      },
+      {
+        "label": "Dokumenti",
+        "href": "#documents"
+      }
+    ]
+  },
+  "agreement": {
+    "title": "Sporazum",
+    "docLocale": "en",
+    "fallbackText": "Sporazum nije bilo moguće automatski učitati. Koristite link ka originalnom fajlu ispod.",
+    "originalLabel": "Otvorite originalni fajl",
+    "originalNote": "(ako je ugrađeni ekran blokiran)."
+  },
+  "bodies": {
+    "title": "Naši organi",
+    "items": [
+      {
+        "title": "Skupština",
+        "description": "Najviši organ Udruženja, koji donosi odluke na osnovu tečne demokratije. Skupština razjašnjava ciljeve, odobrava strateške planove i rešava ključna pitanja u okviru Udruženja.",
+        "linkLabel": "Više o Skupštini →",
+        "linkHref": "https://monte.wiki/ru/%D0%A1%D0%BE%D0%B1%D1%80%D0%B0%D0%BD%D0%B8%D0%B5_%D0%90%D1%81%D1%81%D0%BE%D1%86%D0%B8%D0%B0%D1%86%D0%B8%D0%B8"
+      },
+      {
+        "title": "Savjet",
+        "description": "Izvršni organ koji obezbeđuje sprovođenje odluka Skupštine. Savjet upravlja budžetom, računovodstvom, multipotpisom na blokčejnu i deluje kao podrazumevani garant i arbitar u pravnom sistemu Montelibero.",
+        "linkLabel": "Više o Savjetu →",
+        "linkHref": "https://monte.wiki/ru/%D0%A1%D0%BE%D0%B2%D0%B5%D1%82_%D0%90%D1%81%D1%81%D0%BE%D1%86%D0%B8%D0%B0%D1%86%D0%B8%D0%B8"
+      },
+      {
+        "title": "MTL Sud",
+        "description": "Arbitražni sud. Institucija stvorena da obezbedi optimalan mehanizam za rešavanje sporova između učesnika i pristalica pokreta.",
+        "linkLabel": "Više o MTL Sudu →",
+        "linkHref": "https://montelibero.org/mtl_court/"
+      },
+      {
+        "title": "Distribuirana Uprava",
+        "description": "Platforma za koordinaciju interakcije aktivista i eksperata, zauzimajući mesto \"proširene vlade\" u Udruženju Montelibero. Osmišljena da obezbedi optimalnu konfiguraciju koordinisanog upravljanja zajedničkim zadacima.",
+        "linkLabel": "Više o DU →",
+        "linkHref": "https://monte.wiki/ru/%D0%A0%D0%B0%D1%81%D0%BF%D1%80%D0%B5%D0%B4%D0%B5%D0%BB%D1%91%D0%BD%D0%BD%D0%BE%D0%B5_%D0%9F%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5"
+      },
+      {
+        "title": "Centar za Upravljanje Projektima",
+        "description": "Platforma za koordinaciju interakcije zvaničnika MTLA i koordinatora ključnih projekata, programa i oblasti aktivnosti.",
+        "linkLabel": "Više o CUP →",
+        "linkHref": "https://monte.wiki/ru/%D0%A6%D0%B5%D0%BD%D1%82%D1%80_%D0%A3%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F_%D0%9F%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%BE%D0%BC_%D0%9C%D0%BE%D0%BD%D1%82%D0%B5%D0%BB%D0%B8%D0%B1%D0%B5%D1%80%D0%BE"
+      },
+      {
+        "title": "Radne grupe",
+        "description": "Organi za prethodnu razradu pitanja koje se podnose Savjetu. Imaju ulogu \"parlamentarnih komisija\".",
+        "linkLabel": "Više o RG →",
+        "linkHref": "https://monte.wiki/ru/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B5_%D0%B3%D1%80%D1%83%D0%BF%D0%BF%D1%8B"
+      }
+    ]
+  },
+  "documents": {
+    "title": "Dokumenti i propisi",
+    "items": [
+      {
+        "doc": "agreement",
+        "docLocale": "en",
+        "title": "Sporazum",
+        "description": "Osnivački dokument koji definiše strukturu, ciljeve i principe rada Udruženja Montelibero.",
+        "linkLabel": "Pročitajte Sporazum →"
+      },
+      {
+        "doc": "participation",
+        "docLocale": "ru",
+        "title": "Pravilnik o učešću",
+        "description": "Konkretizuje i reguliše norme Sporazuma u vezi sa primanjem, isključivanjem i promenama statusa učesnika.",
+        "linkLabel": "Pročitajte Pravilnik →"
+      },
+      {
+        "doc": "principles",
+        "docLocale": "en",
+        "title": "Principi Udruženja Montelibero",
+        "description": "Osnovni principi koji služe kao vodič za donošenje odluka unutar Udruženja i opis naših aktivnosti.",
+        "linkLabel": "Pročitajte Principe →"
+      },
+      {
+        "doc": "council",
+        "docLocale": "ru",
+        "title": "Poslovnik Savjeta",
+        "description": "Pravila koja regulišu rad Savjeta i procedure donošenja odluka.",
+        "linkLabel": "Pročitajte Poslovnik →"
+      }
+    ],
+    "footerPrefix": "Pogledajte sve dokumente na ",
+    "footerLinkLabel": "GitHub",
+    "footerSuffix": "."
+  },
+  "footer": {
+    "madeWithLove": "Napravljeno s ljubavlju za MTLA",
+    "sourcePrefix": "Izvorni kod na ",
+    "sourceLinkLabel": "GitHub",
+    "sourceSuffix": ""
+  }
+}

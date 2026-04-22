@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="{{@lang}}" data-no-redirect>
+<head>
+  <meta charset="utf-8">
+  <title>{{title}}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{@description}}">
+  <link rel="icon" href="../favicon.ico" sizes="any">
+  <meta name="theme-color" content="#0b0e0e">
+  <meta property="og:title" content="{{@title}}">
+  <meta property="og:description" content="{{@description}}">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="{{@ogLocale}}">
+  <meta property="og:url" content="{{@canonicalUrl}}">
+  <meta name="twitter:card" content="summary">
+  <link rel="canonical" href="{{@canonicalUrl}}">
+
+{{{alternateLinks}}}
+
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header class="wrap">
+    <details class="lang">
+      <summary class="lang-current">{{currentLanguageLabel}}</summary>
+      <nav class="lang-menu" aria-label="{{@languageSwitcherAriaLabel}}">
+{{{languageMenuLinks}}}
+      </nav>
+    </details>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>{{heroTitle}}</h1>
+      <p class="lead">{{heroLead}}</p>
+      <p>{{heroDescription}}</p>
+      <nav class="nav-links">
+{{{heroNavLinks}}}
+      </nav>
+      <p><a class="btn" href="https://t.me/MTLA_join_bot">{{heroJoinLabel}}</a></p>
+    </section>
+
+    <section id="agreement">
+      <h2>{{agreementTitle}}</h2>
+      <div data-markdown="{{@agreementMarkdownPath}}" data-fallback-text="{{@agreementFallbackText}}">
+        <p class="md-error" hidden>{{agreementFallbackText}}</p>
+        <p><a href="{{@agreementOriginalUrl}}" target="_blank" rel="noopener noreferrer">{{agreementOriginalLabel}}</a> {{agreementOriginalNote}}</p>
+      </div>
+    </section>
+
+    <section id="bodies">
+      <h2>{{bodiesTitle}}</h2>
+{{{bodiesItemsHtml}}}
+    </section>
+
+    <section id="documents">
+      <h2>{{documentsTitle}}</h2>
+{{{documentsItemsHtml}}}
+
+      <p>{{{documentsFooterHtml}}}</p>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <small>{{footerMadeWithLove}}</small><br />
+    <small>{{{footerSourceHtml}}}</small>
+  </footer>
+
+  <script src="../assets/app.js"></script>
+</body>
+</html>
