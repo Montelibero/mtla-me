@@ -178,17 +178,47 @@
   }
 
   function loadMarkdown() {
+    function showMarkdownError(el, err) {
+      var notice = el.querySelector('.md-error');
+      var fallbackText = el.getAttribute('data-fallback-text');
+
+      if (!notice && fallbackText) {
+        notice = document.createElement('p');
+        notice.className = 'md-error';
+        notice.hidden = true;
+        notice.textContent = fallbackText;
+        el.insertBefore(notice, el.firstChild);
+      }
+
+      if (notice) {
+        if (!notice.textContent && fallbackText) notice.textContent = fallbackText;
+        if (el.firstChild !== notice) el.insertBefore(notice, el.firstChild);
+        notice.hidden = false;
+      }
+
+      console.warn('agreement load failed:', err);
+    }
+
     var nodes = document.querySelectorAll('[data-markdown]');
     nodes.forEach(function(el) {
       var file = el.getAttribute('data-markdown');
       if (!file) return;
       fetch(file, { credentials: 'same-origin' })
-        .then(function(r) { return r.text(); })
+        .then(function(response) {
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          var contentType = (response.headers.get('content-type') || '').toLowerCase();
+          if (contentType && contentType.indexOf('text/') !== 0) {
+            throw new Error('Unexpected content type: ' + contentType);
+          }
+          return response.text();
+        })
         .then(function(text) {
           var base = (function(){ try { return new URL(file, location.href).toString(); } catch(_) { return null; } })();
           el.innerHTML = '<article class="markdown">'+parseMd(text, base)+'</article>';
         })
-        .catch(function() { /* fallback */ });
+        .catch(function(err) {
+          showMarkdownError(el, err);
+        });
     });
   }
 
