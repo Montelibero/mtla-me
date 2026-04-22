@@ -3,3 +3,6 @@
 node_modules/
 .vscode/
 .idea/
+
+# temporary
+roadmap.md
