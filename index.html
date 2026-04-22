@@ -10,8 +10,13 @@
       try {
         var supported = window.SUPPORTED_LANGS;
         var url = new URL(window.location.href);
-        var explicit = url.searchParams.get('lang') || localStorage.getItem('lang');
+        var queryLang = url.searchParams.get('lang');
+        var storedLang = null;
         var lang = null;
+
+        try {
+          storedLang = localStorage.getItem('lang');
+        } catch (_) {}
 
         function pickLang(langs) {
           for (var i = 0; i < langs.length; i++) {
@@ -23,11 +28,17 @@
           return null;
         }
 
-        lang = (explicit && supported.indexOf(explicit) >= 0)
-          ? explicit
+        lang = (queryLang && supported.indexOf(queryLang) >= 0)
+          ? queryLang
+          : (storedLang && supported.indexOf(storedLang) >= 0)
+            ? storedLang
           : pickLang(navigator.languages || [navigator.language]) || supported[0];
 
-        localStorage.setItem('lang', lang);
+        if (queryLang && supported.indexOf(queryLang) >= 0) {
+          try {
+            localStorage.setItem('lang', queryLang);
+          } catch (_) {}
+        }
 
         var path = window.location.pathname.replace(/\/index\.html\/?$/, '/');
         if (!path.endsWith('/')) path += '/';
