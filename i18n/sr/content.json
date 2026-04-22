@@ -10,20 +10,21 @@
     "lead": "Vanteritorijalna ugovorna jurisdikcija",
     "description": "Udruženje stvoreno za koordinaciju akcija u postizanju ciljeva pokreta Montelibero, čuvajući slobodu učesnika i ne tražeći isključivo predstavljanje interesa Pokreta.",
     "joinLabel": "Pridružiti se",
+    "joinHrefKey": "joinBot",
     "navLinks": [
       {
         "label": "Telegram",
-        "href": "https://t.me/mtl_association",
+        "hrefKey": "telegramChannel",
         "external": true
       },
       {
         "label": "Wiki",
-        "href": "https://monte.wiki/ru/%D0%90%D1%81%D1%81%D0%BE%D1%86%D0%B8%D0%B0%D1%86%D0%B8%D1%8F_%D0%9C%D0%BE%D0%BD%D1%82%D0%B5%D0%BB%D0%B8%D0%B1%D0%B5%D1%80%D0%BE",
+        "hrefKey": "associationWiki",
         "external": true
       },
       {
         "label": "Stellar",
-        "href": "https://stellar.expert/explorer/public/account/GCNVDZIHGX473FEI7IXCUAEXUJ4BGCKEMHF36VYP5EMS7PX2QBLAMTLA",
+        "hrefKey": "stellarAccount",
         "external": true
       },
       {
@@ -43,8 +44,8 @@
   "agreement": {
     "title": "Sporazum",
     "docLocale": "en",
-    "originalLabel": "Otvorite originalni fajl",
-    "originalNote": "(ako je ugrađeni ekran blokiran)."
+    "originalLabel": "Kanonska verzija",
+    "originalNote": "na docs.mtla.me."
   },
   "bodies": {
     "title": "Naši organi",
@@ -53,37 +54,37 @@
         "title": "Skupština",
         "description": "Najviši organ Udruženja, koji donosi odluke na osnovu tečne demokratije. Skupština razjašnjava ciljeve, odobrava strateške planove i rešava ključna pitanja u okviru Udruženja.",
         "linkLabel": "Više o Skupštini →",
-        "linkHref": "https://monte.wiki/ru/%D0%A1%D0%BE%D0%B1%D1%80%D0%B0%D0%BD%D0%B8%D0%B5_%D0%90%D1%81%D1%81%D0%BE%D1%86%D0%B8%D0%B0%D1%86%D0%B8%D0%B8"
+        "linkHrefKey": "assemblyWiki"
       },
       {
         "title": "Savjet",
         "description": "Izvršni organ koji obezbeđuje sprovođenje odluka Skupštine. Savjet upravlja budžetom, računovodstvom, multipotpisom na blokčejnu i deluje kao podrazumevani garant i arbitar u pravnom sistemu Montelibero.",
         "linkLabel": "Više o Savjetu →",
-        "linkHref": "https://monte.wiki/ru/%D0%A1%D0%BE%D0%B2%D0%B5%D1%82_%D0%90%D1%81%D1%81%D0%BE%D1%86%D0%B8%D0%B0%D1%86%D0%B8%D0%B8"
+        "linkHrefKey": "councilWiki"
       },
       {
         "title": "MTL Sud",
         "description": "Arbitražni sud. Institucija stvorena da obezbedi optimalan mehanizam za rešavanje sporova između učesnika i pristalica pokreta.",
         "linkLabel": "Više o MTL Sudu →",
-        "linkHref": "https://montelibero.org/mtl_court/"
+        "linkHrefKey": "courtPage"
       },
       {
         "title": "Distribuirana Uprava",
         "description": "Platforma za koordinaciju interakcije aktivista i eksperata, zauzimajući mesto \"proširene vlade\" u Udruženju Montelibero. Osmišljena da obezbedi optimalnu konfiguraciju koordinisanog upravljanja zajedničkim zadacima.",
         "linkLabel": "Više o DU →",
-        "linkHref": "https://monte.wiki/ru/%D0%A0%D0%B0%D1%81%D0%BF%D1%80%D0%B5%D0%B4%D0%B5%D0%BB%D1%91%D0%BD%D0%BD%D0%BE%D0%B5_%D0%9F%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5"
+        "linkHrefKey": "distributedManagementWiki"
       },
       {
         "title": "Centar za Upravljanje Projektima",
         "description": "Platforma za koordinaciju interakcije zvaničnika MTLA i koordinatora ključnih projekata, programa i oblasti aktivnosti.",
         "linkLabel": "Više o CUP →",
-        "linkHref": "https://monte.wiki/ru/%D0%A6%D0%B5%D0%BD%D1%82%D1%80_%D0%A3%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F_%D0%9F%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%BE%D0%BC_%D0%9C%D0%BE%D0%BD%D1%82%D0%B5%D0%BB%D0%B8%D0%B1%D0%B5%D1%80%D0%BE"
+        "linkHrefKey": "missionControlCenterWiki"
       },
       {
         "title": "Radne grupe",
         "description": "Organi za prethodnu razradu pitanja koje se podnose Savjetu. Imaju ulogu \"parlamentarnih komisija\".",
         "linkLabel": "Više o RG →",
-        "linkHref": "https://monte.wiki/ru/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B5_%D0%B3%D1%80%D1%83%D0%BF%D0%BF%D1%8B"
+        "linkHrefKey": "workingGroupsWiki"
       }
     ]
   },
@@ -120,7 +121,7 @@
       }
     ],
     "footerPrefix": "Pogledajte sve dokumente na ",
-    "footerLinkLabel": "GitHub",
+    "footerLinkLabel": "docs.mtla.me",
     "footerSuffix": "."
   },
   "footer": {

@@ -221,6 +221,16 @@ header.wrap { padding: 0; height: 0; margin: 0; }
   word-break: normal;
   overflow-wrap: break-word;
 }
+.markdown li > p:only-child { margin: 0; }
 .markdown p { margin: .5rem 0 .9rem; }
 .markdown ol, .markdown ul { padding-left: 1.2rem; }
 .markdown li { margin: .25rem 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .btn:hover { transform: none; }
+}

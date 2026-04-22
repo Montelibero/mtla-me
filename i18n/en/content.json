@@ -10,20 +10,21 @@
     "lead": "Extraterritorial contractual jurisdiction",
     "description": "An organization created to coordinate actions towards achieving the goals of the Montelibero movement, while preserving the freedom of participants and not claiming sole representation of the Movement's interests.",
     "joinLabel": "Join",
+    "joinHrefKey": "joinBot",
     "navLinks": [
       {
         "label": "Telegram",
-        "href": "https://t.me/mtl_association",
+        "hrefKey": "telegramChannel",
         "external": true
       },
       {
         "label": "Wiki",
-        "href": "https://monte.wiki/ru/%D0%90%D1%81%D1%81%D0%BE%D1%86%D0%B8%D0%B0%D1%86%D0%B8%D1%8F_%D0%9C%D0%BE%D0%BD%D1%82%D0%B5%D0%BB%D0%B8%D0%B1%D0%B5%D1%80%D0%BE",
+        "hrefKey": "associationWiki",
         "external": true
       },
       {
         "label": "Stellar",
-        "href": "https://stellar.expert/explorer/public/account/GCNVDZIHGX473FEI7IXCUAEXUJ4BGCKEMHF36VYP5EMS7PX2QBLAMTLA",
+        "hrefKey": "stellarAccount",
         "external": true
       },
       {
@@ -43,8 +44,8 @@
   "agreement": {
     "title": "Agreement",
     "docLocale": "en",
-    "originalLabel": "Open the original file",
-    "originalNote": "(if the built-in display is blocked)."
+    "originalLabel": "Canonical version",
+    "originalNote": "on docs.mtla.me."
   },
   "bodies": {
     "title": "Our Bodies",
@@ -53,37 +54,37 @@
         "title": "Assembly",
         "description": "The highest governing body of the Association, making decisions based on liquid democracy. The Assembly clarifies goals, approves strategic plans, and addresses key issues within the Association's framework.",
         "linkLabel": "Learn more about the Assembly →",
-        "linkHref": "https://monte.wiki/ru/%D0%A1%D0%BE%D0%B1%D1%80%D0%B0%D0%BD%D0%B8%D0%B5_%D0%90%D1%81%D1%81%D0%BE%D1%86%D0%B8%D0%B0%D1%86%D0%B8%D0%B8"
+        "linkHrefKey": "assemblyWiki"
       },
       {
         "title": "Council",
         "description": "The executive body ensuring implementation of the Assembly's decisions. The Council handles budgeting, accounting, blockchain multi-signature, and serves as the default guarantor and arbitrator in the Montelibero legal system.",
         "linkLabel": "Learn more about the Council →",
-        "linkHref": "https://monte.wiki/ru/%D0%A1%D0%BE%D0%B2%D0%B5%D1%82_%D0%90%D1%81%D1%81%D0%BE%D1%86%D0%B8%D0%B0%D1%86%D0%B8%D0%B8"
+        "linkHrefKey": "councilWiki"
       },
       {
         "title": "MTL Court",
         "description": "An arbitration court. An institution created to provide an optimal mechanism for resolving disputes between participants and supporters of the movement.",
         "linkLabel": "Learn more about MTL Court →",
-        "linkHref": "https://montelibero.org/mtl_court/"
+        "linkHrefKey": "courtPage"
       },
       {
         "title": "Distributed Management",
         "description": "A coordination platform for activists and experts, occupying the place of an \"extended government\" in the Montelibero Association. Designed to ensure optimal configuration of coordinated management of common tasks.",
         "linkLabel": "Learn more about DM →",
-        "linkHref": "https://monte.wiki/ru/%D0%A0%D0%B0%D1%81%D0%BF%D1%80%D0%B5%D0%B4%D0%B5%D0%BB%D1%91%D0%BD%D0%BD%D0%BE%D0%B5_%D0%9F%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5"
+        "linkHrefKey": "distributedManagementWiki"
       },
       {
         "title": "Mission Control Center",
         "description": "A coordination platform for MTLA officials and coordinators of key projects, programs, and areas of activity.",
         "linkLabel": "Learn more about MCC →",
-        "linkHref": "https://monte.wiki/ru/%D0%A6%D0%B5%D0%BD%D1%82%D1%80_%D0%A3%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F_%D0%9F%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%BE%D0%BC_%D0%9C%D0%BE%D0%BD%D1%82%D0%B5%D0%BB%D0%B8%D0%B1%D0%B5%D1%80%D0%BE"
+        "linkHrefKey": "missionControlCenterWiki"
       },
       {
         "title": "Working Groups",
         "description": "Bodies for preliminary elaboration of issues submitted to the Council. They perform the role of \"parliamentary committees\".",
         "linkLabel": "Learn more about WG →",
-        "linkHref": "https://monte.wiki/ru/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B5_%D0%B3%D1%80%D1%83%D0%BF%D0%BF%D1%8B"
+        "linkHrefKey": "workingGroupsWiki"
       }
     ]
   },
@@ -120,7 +121,7 @@
       }
     ],
     "footerPrefix": "View all documents on ",
-    "footerLinkLabel": "GitHub",
+    "footerLinkLabel": "docs.mtla.me",
     "footerSuffix": "."
   },
   "footer": {

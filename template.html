@@ -5,8 +5,11 @@
   <title>{{title}}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="{{@description}}">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; frame-ancestors 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <link rel="icon" href="../favicon.ico" sizes="any">
   <meta name="theme-color" content="#0b0e0e">
+  <meta property="og:site_name" content="Montelibero Association">
   <meta property="og:title" content="{{@title}}">
   <meta property="og:description" content="{{@description}}">
   <meta property="og:type" content="website">
@@ -37,7 +40,7 @@
       <nav class="nav-links">
 {{{heroNavLinks}}}
       </nav>
-      <p><a class="btn" href="https://t.me/MTLA_join_bot">{{heroJoinLabel}}</a></p>
+      <p><a class="btn" href="{{@heroJoinHref}}">{{heroJoinLabel}}</a></p>
     </section>
 
     <section id="agreement">

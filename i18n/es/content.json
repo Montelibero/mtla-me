@@ -10,20 +10,21 @@
     "lead": "Jurisdicción contractual extraterritorial",
     "description": "Una organización creada para coordinar acciones hacia el logro de los objetivos del movimiento Montelibero, preservando la libertad de los participantes y sin reclamar representación exclusiva de los intereses del Movimiento.",
     "joinLabel": "Unirse",
+    "joinHrefKey": "joinBot",
     "navLinks": [
       {
         "label": "Telegram",
-        "href": "https://t.me/mtl_association",
+        "hrefKey": "telegramChannel",
         "external": true
       },
       {
         "label": "Wiki",
-        "href": "https://monte.wiki/ru/%D0%90%D1%81%D1%81%D0%BE%D1%86%D0%B8%D0%B0%D1%86%D0%B8%D1%8F_%D0%9C%D0%BE%D0%BD%D1%82%D0%B5%D0%BB%D0%B8%D0%B1%D0%B5%D1%80%D0%BE",
+        "hrefKey": "associationWiki",
         "external": true
       },
       {
         "label": "Stellar",
-        "href": "https://stellar.expert/explorer/public/account/GCNVDZIHGX473FEI7IXCUAEXUJ4BGCKEMHF36VYP5EMS7PX2QBLAMTLA",
+        "hrefKey": "stellarAccount",
         "external": true
       },
       {
@@ -43,8 +44,8 @@
   "agreement": {
     "title": "Acuerdo",
     "docLocale": "en",
-    "originalLabel": "Abre el archivo original",
-    "originalNote": "(si la pantalla integrada está bloqueada)."
+    "originalLabel": "Versión canónica",
+    "originalNote": "en docs.mtla.me."
   },
   "bodies": {
     "title": "Nuestros Órganos",
@@ -53,37 +54,37 @@
         "title": "Asamblea",
         "description": "El órgano de gobierno más alto de la Asociación, que toma decisiones basadas en democracia líquida. La Asamblea aclara objetivos, aprueba planes estratégicos y aborda cuestiones clave dentro del marco de la Asociación.",
         "linkLabel": "Más sobre la Asamblea →",
-        "linkHref": "https://monte.wiki/ru/%D0%A1%D0%BE%D0%B1%D1%80%D0%B0%D0%BD%D0%B8%D0%B5_%D0%90%D1%81%D1%81%D0%BE%D1%86%D0%B8%D0%B0%D1%86%D0%B8%D0%B8"
+        "linkHrefKey": "assemblyWiki"
       },
       {
         "title": "Consejo",
         "description": "El órgano ejecutivo que garantiza la implementación de las decisiones de la Asamblea. El Consejo maneja presupuestos, contabilidad, multi-firma blockchain y actúa como garante y árbitro predeterminado en el sistema legal de Montelibero.",
         "linkLabel": "Más sobre el Consejo →",
-        "linkHref": "https://monte.wiki/ru/%D0%A1%D0%BE%D0%B2%D0%B5%D1%82_%D0%90%D1%81%D1%81%D0%BE%D1%86%D0%B8%D0%B0%D1%86%D0%B8%D0%B8"
+        "linkHrefKey": "councilWiki"
       },
       {
         "title": "Tribunal MTL",
         "description": "Un tribunal de arbitraje. Una institución creada para proporcionar un mecanismo óptimo para resolver disputas entre participantes y seguidores del movimiento.",
         "linkLabel": "Más sobre el Tribunal MTL →",
-        "linkHref": "https://montelibero.org/mtl_court/"
+        "linkHrefKey": "courtPage"
       },
       {
         "title": "Gobernanza Distribuida",
         "description": "Una plataforma de coordinación para activistas y expertos, que ocupa el lugar de un \"gobierno extendido\" en la Asociación Montelibero. Diseñada para garantizar una configuración óptima de gestión coordinada de tareas comunes.",
         "linkLabel": "Más sobre GD →",
-        "linkHref": "https://monte.wiki/ru/%D0%A0%D0%B0%D1%81%D0%BF%D1%80%D0%B5%D0%B4%D0%B5%D0%BB%D1%91%D0%BD%D0%BD%D0%BE%D0%B5_%D0%9F%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5"
+        "linkHrefKey": "distributedManagementWiki"
       },
       {
         "title": "Centro de Gestión de Proyectos",
         "description": "Una plataforma de coordinación para funcionarios de MTLA y coordinadores de proyectos, programas y áreas de actividad clave.",
         "linkLabel": "Más sobre CGP →",
-        "linkHref": "https://monte.wiki/ru/%D0%A6%D0%B5%D0%BD%D1%82%D1%80_%D0%A3%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F_%D0%9F%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%BE%D0%BC_%D0%9C%D0%BE%D0%BD%D1%82%D0%B5%D0%BB%D0%B8%D0%B1%D0%B5%D1%80%D0%BE"
+        "linkHrefKey": "missionControlCenterWiki"
       },
       {
         "title": "Grupos de Trabajo",
         "description": "Órganos para la elaboración preliminar de cuestiones presentadas al Consejo. Desempeñan el papel de \"comités parlamentarios\".",
         "linkLabel": "Más sobre GT →",
-        "linkHref": "https://monte.wiki/ru/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B5_%D0%B3%D1%80%D1%83%D0%BF%D0%BF%D1%8B"
+        "linkHrefKey": "workingGroupsWiki"
       }
     ]
   },
@@ -120,7 +121,7 @@
       }
     ],
     "footerPrefix": "Ver todos los documentos en ",
-    "footerLinkLabel": "GitHub",
+    "footerLinkLabel": "docs.mtla.me",
     "footerSuffix": "."
   },
   "footer": {

@@ -9,9 +9,13 @@ Minimal multilingual landing page for the Montelibero Association.
 ├── index.html             # Root language redirect / noscript chooser
 ├── template.html          # Shared HTML template for locale pages
 ├── assets/                # CSS and minimal client-side JS
-├── i18n/*/content.json    # Per-locale content source
+├── i18n/
+│   ├── links.json         # Shared external links used by locale content
+│   └── */content.json     # Per-locale content source
 ├── documents/             # Source Markdown documents
-├── scripts/build.mjs      # Static build to _site/
+├── scripts/
+│   ├── build.mjs          # Static build to _site/
+│   └── schema.mjs         # Content validation before render
 ├── _site/                 # Generated artifact
 ├── Dockerfile             # Container image for local preview
 └── .github/workflows/     # GitHub Pages deployment
@@ -21,38 +25,32 @@ Minimal multilingual landing page for the Montelibero Association.
 
 - `scripts/build.mjs` renders locale pages from `template.html` and `i18n/*/content.json`
 - `documents/Agreement.en.md` and `documents/Agreement.ru.md` are rendered at build time and inlined into the locale HTML
-- GitHub Pages deploys only the generated `_site/` artifact
-- The root page redirects by browser language when JavaScript is enabled and shows manual links in `<noscript>`
+- Shared repeated URLs live in `i18n/links.json`
+- `scripts/schema.mjs` validates locale content before render and fails with field-level errors
+- GitHub Pages deploys only the generated `_site/` artifact from the `v2` branch workflow
 
 ## Supported languages
 
-- 🇬🇧 English (en)
-- 🇷🇺 Russian (ru)
-- 🇪🇸 Spanish (es)
-- 🇲🇪 Montenegrin (sr)
-
-## Features
-
-- ✅ Static output for GitHub Pages
-- ✅ Minimal runtime JS
-- ✅ Auto language detection by browser settings
-- ✅ Build-time Agreement rendering
-- ✅ NoScript friendly
-- ✅ Responsive design
-- ✅ Auto-deployment to GitHub Pages
-- ✅ Docker/local preview from the same `_site` artifact
+- English (`en`)
+- Russian (`ru`)
+- Spanish (`es`)
+- Montenegrin (`sr`)
 
 ## Development
 
 ```bash
 npm ci
 npm run build
-
-# Preview the generated site
 ./serve.sh
-
-# Then open http://localhost:8080
 ```
+
+Then open `http://localhost:8080`.
+
+## Deployment
+
+- Push to the `v2` branch to trigger the GitHub Pages workflow
+- Production uses the custom domain `mtla.me`
+- The workflow builds `_site/` and uploads that artifact to Pages
 
 Docker preview uses the same build output:
 

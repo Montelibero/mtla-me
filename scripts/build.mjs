@@ -3,10 +3,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
+import { validateLinksMap, validateLocaleContent } from './schema.mjs';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outputDir = path.resolve(rootDir, process.argv[2] || '_site');
 
+const SITE_ORIGIN = 'https://mtla.me';
+const DOCS_SITE_URL = 'https://docs.mtla.me/';
 const SUPPORTED_LANGS = ['en', 'ru', 'es', 'sr'];
 const DOC_PATHS = {
   agreement: 'Agreement/Agreement',
@@ -16,7 +19,8 @@ const DOC_PATHS = {
 };
 
 const template = fs.readFileSync(path.join(rootDir, 'template.html'), 'utf8');
-const localeContent = loadLocaleContent();
+const sharedLinks = loadSharedLinks();
+const localeContent = loadLocaleContent(sharedLinks);
 const agreementHtmlByLocale = {
   en: renderAgreementHtml('en'),
   ru: renderAgreementHtml('ru'),
@@ -50,21 +54,60 @@ function buildSite() {
   }
 }
 
-function loadLocaleContent() {
+function loadSharedLinks() {
+  const file = path.join(rootDir, 'i18n', 'links.json');
+  const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+  validateLinksMap(parsed, file);
+  return parsed;
+}
+
+function loadLocaleContent(links) {
   const content = {};
+  const linkKeys = new Set(Object.keys(links));
 
   for (const lang of SUPPORTED_LANGS) {
     const file = path.join(rootDir, 'i18n', lang, 'content.json');
     const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+    validateLocaleContent(parsed, file, linkKeys);
 
     if (parsed.lang !== lang) {
       throw new Error(`Locale file ${file} declares lang=${parsed.lang}, expected ${lang}`);
     }
 
-    content[lang] = parsed;
+    content[lang] = resolveLocaleLinks(parsed, links);
   }
 
   return content;
+}
+
+function resolveLocaleLinks(content, links) {
+  return {
+    ...content,
+    hero: {
+      ...content.hero,
+      joinHref: resolveLinkKey(content.hero.joinHrefKey, links),
+      navLinks: content.hero.navLinks.map(({ hrefKey, ...link }) => ({
+        ...link,
+        href: link.href ?? resolveLinkKey(hrefKey, links),
+      })),
+    },
+    bodies: {
+      ...content.bodies,
+      items: content.bodies.items.map(({ linkHrefKey, ...item }) => ({
+        ...item,
+        linkHref: item.linkHref ?? resolveLinkKey(linkHrefKey, links),
+      })),
+    },
+  };
+}
+
+function resolveLinkKey(key, links) {
+  if (!key) return undefined;
+  const value = links[key];
+  if (!value) {
+    throw new Error(`Unknown shared link key: ${key}`);
+  }
+  return value;
 }
 
 function buildViewModel(content) {
@@ -73,7 +116,7 @@ function buildViewModel(content) {
     title: content.title,
     description: content.description,
     ogLocale: content.ogLocale,
-    canonicalUrl: `https://mtla.me/${content.lang}/`,
+    canonicalUrl: `${SITE_ORIGIN}/${content.lang}/`,
     currentLanguageLabel: content.currentLanguageLabel,
     languageSwitcherAriaLabel: content.languageSwitcherAriaLabel,
     alternateLinks: renderAlternateLinks(content.lang),
@@ -82,6 +125,7 @@ function buildViewModel(content) {
     heroLead: content.hero.lead,
     heroDescription: content.hero.description,
     heroNavLinks: renderHeroNavLinks(content.hero.navLinks),
+    heroJoinHref: content.hero.joinHref,
     heroJoinLabel: content.hero.joinLabel,
     agreementTitle: content.agreement.title,
     agreementHtml: indentHtml(agreementHtmlByLocale[content.agreement.docLocale], 10),
@@ -95,7 +139,7 @@ function buildViewModel(content) {
     documentsFooterHtml: renderInlineHtml(
       content.documents.footerPrefix,
       {
-        href: 'https://github.com/Montelibero/MTLA-Documents',
+        href: DOCS_SITE_URL,
         label: content.documents.footerLinkLabel,
         external: true,
       },
@@ -185,9 +229,7 @@ function restoreAlphaListMarkers(html) {
 }
 
 function renderAlternateLinks(currentLang) {
-  const orderedLangs = currentLang === 'ru'
-    ? ['ru', 'en', 'es', 'sr']
-    : ['en', 'ru', 'es', 'sr'];
+  const orderedLangs = [currentLang, ...SUPPORTED_LANGS.filter((lang) => lang !== currentLang)];
 
   const links = orderedLangs.map((lang) =>
     `  <link rel="alternate" hreflang="${escapeAttr(lang)}" href="../${escapeAttr(lang)}/">`
@@ -255,7 +297,7 @@ function renderAnchor({ href, label, className, hreflang, external }) {
 
   if (external) {
     attrs.push('target="_blank"');
-    attrs.push('rel="noopener"');
+    attrs.push('rel="noopener noreferrer"');
   }
 
   return `<a ${attrs.join(' ')}>${escapeText(label)}</a>`;
@@ -330,7 +372,7 @@ function indentHtml(html, spaces) {
 function isExternalHttpUrl(href) {
   try {
     const url = new URL(href);
-    return /^https?:$/.test(url.protocol) && url.origin !== 'https://mtla.me';
+    return /^https?:$/.test(url.protocol) && url.origin !== SITE_ORIGIN;
   } catch (_) {
     return false;
   }
