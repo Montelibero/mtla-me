@@ -1,20 +1,15 @@
 #!/bin/bash
-# serve.sh - local development server for mtla-me
 
-set -e
+set -euo pipefail
 
-echo "Preparing files for local development..."
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PORT="${1:-8080}"
 
-# Copy files from i18n to root for local development
-shopt -s nullglob dotglob
-for dir in i18n/*/ ; do
-  lang="$(basename "$dir")"
-  rm -rf "$lang"
-  mkdir -p "$lang"
-  rsync -a --delete "$dir" "$lang"/
-done
+cd "$ROOT_DIR"
 
-echo "Files copied, starting server..."
+echo "Building site into _site/ ..."
+npm run build
 
-# Start Python server
-python3 -m http.server 8080
+echo "Serving _site/ on http://localhost:${PORT}"
+cd "$ROOT_DIR/_site"
+exec python3 -m http.server "$PORT"

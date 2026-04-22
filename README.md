@@ -1,42 +1,28 @@
 # Montelibero Association Landing
 
-Minimal multilingual landing page for Montelibero Association without dependencies.
+Minimal multilingual landing page for the Montelibero Association.
 
 ## Project structure
 
-```
+```text
 .
-├── index.html             # Main page with language selection
-├── assets/
-│   ├── app.js             # JavaScript: language + Markdown
-│   └── style.css          # Styles
-├── i18n/
-│   ├── en/index.html      # English version
-│   ├── ru/index.html      # Russian version
-│   ├── es/index.html      # Spanish version
-│   └── sr/index.html      # Montenegrin version
-├── documents/
-│   ├── Agreement.en.md    # MTLA Agreement in English
-│   └── Agreement.ru.md    # MTLA Agreement in Russian
-├── Dockerfile             # Docker image (nginx:alpine)
-├── docker-compose.yml     # Docker Compose configuration
-└── .github/
-    └── workflows/
-        └── deploy.yml     # GitHub Actions for auto-deployment
+├── index.html             # Root language redirect / noscript chooser
+├── template.html          # Shared HTML template for locale pages
+├── assets/                # CSS and minimal client-side JS
+├── i18n/*/content.json    # Per-locale content source
+├── documents/             # Source Markdown documents
+├── scripts/build.mjs      # Static build to _site/
+├── _site/                 # Generated artifact
+├── Dockerfile             # Container image for local preview
+└── .github/workflows/     # GitHub Pages deployment
 ```
 
 ## How it works
 
-### Language selection
-
-1. **With JavaScript**: automatic redirect to browser language
-2. **Without JavaScript**: links for manual language selection
-3. **On pages**: pure CSS dropdown menu for switching
-
-### Markdown loading
-
-- **With JavaScript**: `Agreement.*.md` files are loaded and converted to HTML with built-in parser
-- **Without JavaScript**: attempt to load via <object>, link to GitHub for viewing source
+- `scripts/build.mjs` renders locale pages from `template.html` and `i18n/*/content.json`
+- `documents/Agreement.en.md` and `documents/Agreement.ru.md` are rendered at build time and inlined into the locale HTML
+- GitHub Pages deploys only the generated `_site/` artifact
+- The root page redirects by browser language when JavaScript is enabled and shows manual links in `<noscript>`
 
 ## Supported languages
 
@@ -47,24 +33,32 @@ Minimal multilingual landing page for Montelibero Association without dependenci
 
 ## Features
 
-- ✅ **Minimal size** - pure HTML/CSS/JS,
-- ✅ **Auto language detection** by browser settings
-- ✅ **Built-in Markdown parser** (133 lines)
-- ✅ **NoScript friendly** - works without JavaScript
-- ✅ **Responsive design** - for all devices
-- ✅ **Auto-deployment** to GitHub Pages
-- ✅ **Docker ready** - one-click launch
+- ✅ Static output for GitHub Pages
+- ✅ Minimal runtime JS
+- ✅ Auto language detection by browser settings
+- ✅ Build-time Agreement rendering
+- ✅ NoScript friendly
+- ✅ Responsive design
+- ✅ Auto-deployment to GitHub Pages
+- ✅ Docker/local preview from the same `_site` artifact
 
 ## Development
 
 ```bash
-# Local server (Python)
-chmod +x serve.sh
+npm ci
+npm run build
+
+# Preview the generated site
 ./serve.sh
 
 # Then open http://localhost:8080
+```
 
-# (Also works with PHP)
+Docker preview uses the same build output:
+
+```bash
+docker build -t mtla-landing .
+docker run --rm -p 8080:80 mtla-landing
 ```
 
 ## License

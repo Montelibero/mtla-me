@@ -1,26 +1,12 @@
-# Minimal static file server using nginx alpine
-FROM nginx:alpine as base
+FROM node:22-alpine AS build
+WORKDIR /app
 
-# Use a builder stage to prepare the site tree (sync i18n -> root)
-FROM alpine:3.20 as build
-WORKDIR /src
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Copy repository files into build context
 COPY . .
+RUN npm run build
 
-# Sync i18n/<lang> into /src/<lang> similar to CI/serve.sh (POSIX shell)
-RUN set -e; \
-    for d in i18n/*/; do \
-      lang="$(basename "$d")"; \
-      rm -rf "$lang" && mkdir -p "$lang"; \
-      cp -R "$d". "$lang"/; \
-    done
-
-# Nginx to serve static files
 FROM nginx:alpine
-
-# Copy prepared site from builder
-COPY --from=build /src /usr/share/nginx/html/
-
-# Expose port 80
+COPY --from=build /app/_site/ /usr/share/nginx/html/
 EXPOSE 80
