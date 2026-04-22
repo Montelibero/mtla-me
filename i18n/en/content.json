@@ -43,7 +43,6 @@
   "agreement": {
     "title": "Agreement",
     "docLocale": "en",
-    "fallbackText": "The agreement could not be loaded automatically. Please use the original file link below.",
     "originalLabel": "Open the original file",
     "originalNote": "(if the built-in display is blocked)."
   },

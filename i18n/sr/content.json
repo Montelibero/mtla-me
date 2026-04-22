@@ -43,7 +43,6 @@
   "agreement": {
     "title": "Sporazum",
     "docLocale": "en",
-    "fallbackText": "Sporazum nije bilo moguće automatski učitati. Koristite link ka originalnom fajlu ispod.",
     "originalLabel": "Otvorite originalni fajl",
     "originalNote": "(ako je ugrađeni ekran blokiran)."
   },

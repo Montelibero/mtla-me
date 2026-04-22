@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { marked } from 'marked';
+import sanitizeHtml from 'sanitize-html';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outputDir = path.resolve(rootDir, process.argv[2] || '_site');
@@ -15,6 +17,10 @@ const DOC_PATHS = {
 
 const template = fs.readFileSync(path.join(rootDir, 'template.html'), 'utf8');
 const localeContent = loadLocaleContent();
+const agreementHtmlByLocale = {
+  en: renderAgreementHtml('en'),
+  ru: renderAgreementHtml('ru'),
+};
 const languageLabels = Object.fromEntries(
   SUPPORTED_LANGS.map((lang) => [lang, localeContent[lang].currentLanguageLabel])
 );
@@ -78,8 +84,7 @@ function buildViewModel(content) {
     heroNavLinks: renderHeroNavLinks(content.hero.navLinks),
     heroJoinLabel: content.hero.joinLabel,
     agreementTitle: content.agreement.title,
-    agreementMarkdownPath: `../documents/Agreement.${content.agreement.docLocale}.md`,
-    agreementFallbackText: content.agreement.fallbackText,
+    agreementHtml: indentHtml(agreementHtmlByLocale[content.agreement.docLocale], 10),
     agreementOriginalUrl: docUrl('agreement', content.agreement.docLocale),
     agreementOriginalLabel: content.agreement.originalLabel,
     agreementOriginalNote: content.agreement.originalNote,
@@ -107,6 +112,76 @@ function buildViewModel(content) {
       content.footer.sourceSuffix || ''
     ),
   };
+}
+
+function renderAgreementHtml(locale) {
+  const markdown = fs.readFileSync(path.join(rootDir, 'documents', `Agreement.${locale}.md`), 'utf8');
+  const normalized = normalizeAgreementMarkdown(markdown);
+  const rendered = marked.parse(normalized, { gfm: true });
+  const sanitized = sanitizeHtml(rendered, {
+    allowedTags: ['a', 'p', 'ol', 'ul', 'li', 'blockquote', 'em', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br'],
+    allowedAttributes: {
+      a: ['href', 'target', 'rel'],
+      ol: ['start', 'type'],
+    },
+    allowedSchemes: ['http', 'https', 'mailto'],
+    allowProtocolRelative: false,
+    disallowedTagsMode: 'discard',
+    transformTags: {
+      a: function(tagName, attribs) {
+        const href = attribs.href || '';
+        const nextAttribs = href ? { href } : {};
+
+        if (isExternalHttpUrl(href)) {
+          nextAttribs.target = '_blank';
+          nextAttribs.rel = 'noopener noreferrer';
+        }
+
+        return { tagName, attribs: nextAttribs };
+      },
+    },
+  }).trim();
+
+  return restoreAlphaListMarkers(sanitized);
+}
+
+function normalizeAgreementMarkdown(markdown) {
+  const linked = markdown.replace(
+    /\[Agreement\.ru\.md\]\(Agreement\.ru\.md\)/g,
+    `[Agreement.ru.md](${docUrl('agreement', 'ru')})`
+  );
+  const withoutTitle = stripLeadingHeading(linked);
+  return normalizeAlphaLists(withoutTitle);
+}
+
+function stripLeadingHeading(markdown) {
+  const lines = markdown.split('\n');
+  const firstNumberedIndex = lines.findIndex((line) => /^\s*\d+\.\s+/.test(line));
+
+  for (let i = 0; i < lines.length; i++) {
+    if (firstNumberedIndex >= 0 && i >= firstNumberedIndex) break;
+
+    if (/^#{1,6}\s+/.test(lines[i])) {
+      lines.splice(i, 1);
+      break;
+    }
+
+    if ((lines[i] || '').trim() && /^[=-]{2,}\s*$/.test(lines[i + 1] || '')) {
+      lines.splice(i, 2);
+      break;
+    }
+  }
+
+  while (lines[0] === '') lines.shift();
+  return lines.join('\n');
+}
+
+function normalizeAlphaLists(markdown) {
+  return markdown.replace(/^(\s+)([a-z])\)\s+/gm, '$11. ');
+}
+
+function restoreAlphaListMarkers(html) {
+  return html.replace(/(<\/p>\s*)<ol>(\s*<li>)/g, '$1<ol type="a">$2');
 }
 
 function renderAlternateLinks(currentLang) {
@@ -244,6 +319,22 @@ function escapeAttr(value) {
   });
 }
 
+function indentHtml(html, spaces) {
+  const padding = ' '.repeat(spaces);
+  return html
+    .split('\n')
+    .map((line) => (line ? padding + line : ''))
+    .join('\n');
+}
+
+function isExternalHttpUrl(href) {
+  try {
+    const url = new URL(href);
+    return /^https?:$/.test(url.protocol) && url.origin !== 'https://mtla.me';
+  } catch (_) {
+    return false;
+  }
+}
 
 function copyPublicAsset(relativePath) {
   fs.cpSync(path.join(rootDir, relativePath), path.join(outputDir, relativePath), {

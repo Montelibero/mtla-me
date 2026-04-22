@@ -42,8 +42,10 @@
 
     <section id="agreement">
       <h2>{{agreementTitle}}</h2>
-      <div data-markdown="{{@agreementMarkdownPath}}" data-fallback-text="{{@agreementFallbackText}}">
-        <p class="md-error" hidden>{{agreementFallbackText}}</p>
+      <div>
+        <article class="markdown">
+{{{agreementHtml}}}
+        </article>
         <p><a href="{{@agreementOriginalUrl}}" target="_blank" rel="noopener noreferrer">{{agreementOriginalLabel}}</a> {{agreementOriginalNote}}</p>
       </div>
     </section>
@@ -65,7 +67,5 @@
     <small>{{footerMadeWithLove}}</small><br />
     <small>{{{footerSourceHtml}}}</small>
   </footer>
-
-  <script src="../assets/app.js"></script>
 </body>
 </html>

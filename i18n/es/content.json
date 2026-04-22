@@ -43,7 +43,6 @@
   "agreement": {
     "title": "Acuerdo",
     "docLocale": "en",
-    "fallbackText": "No se pudo cargar el acuerdo automáticamente. Usa el enlace al archivo original que aparece abajo.",
     "originalLabel": "Abre el archivo original",
     "originalNote": "(si la pantalla integrada está bloqueada)."
   },
