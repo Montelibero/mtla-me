@@ -3,14 +3,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
+import { DOCS_SITE_URL, LOCALES, LOCALE_BY_KEY, SITE_ORIGIN } from '../site.config.mjs';
 import { validateLinksMap, validateLocaleContent } from './schema.mjs';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outputDir = path.resolve(rootDir, process.argv[2] || '_site');
-
-const SITE_ORIGIN = 'https://mtla.me';
-const DOCS_SITE_URL = 'https://docs.mtla.me/';
-const SUPPORTED_LANGS = ['en', 'ru', 'es', 'sr'];
 const DOC_PATHS = {
   agreement: 'Agreement/Agreement',
   participation: 'Participation/Participation',
@@ -26,7 +23,7 @@ const agreementHtmlByLocale = {
   ru: renderAgreementHtml('ru'),
 };
 const languageLabels = Object.fromEntries(
-  SUPPORTED_LANGS.map((lang) => [lang, localeContent[lang].currentLanguageLabel])
+  LOCALES.map(({ key }) => [key, localeContent[key].currentLanguageLabel])
 );
 
 buildSite();
@@ -36,16 +33,15 @@ function buildSite() {
   fs.mkdirSync(outputDir, { recursive: true });
 
   copyPublicAsset('assets');
-  copyPublicAsset('documents');
   copyPublicAsset('index.html');
   copyPublicAsset('CNAME');
   copyPublicAsset('.nojekyll');
   copyPublicAsset('robots.txt');
   copyPublicAsset('favicon.ico');
   copyPublicAsset('llms.txt');
-  copyPublicAsset('sitemap.xml');
+  fs.writeFileSync(path.join(outputDir, 'sitemap.xml'), renderSitemap());
 
-  for (const lang of SUPPORTED_LANGS) {
+  for (const { key: lang } of LOCALES) {
     const localeDir = path.join(outputDir, lang);
     fs.mkdirSync(localeDir, { recursive: true });
 
@@ -65,7 +61,7 @@ function loadLocaleContent(links) {
   const content = {};
   const linkKeys = new Set(Object.keys(links));
 
-  for (const lang of SUPPORTED_LANGS) {
+  for (const { key: lang } of LOCALES) {
     const file = path.join(rootDir, 'i18n', lang, 'content.json');
     const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
     validateLocaleContent(parsed, file, linkKeys);
@@ -111,12 +107,14 @@ function resolveLinkKey(key, links) {
 }
 
 function buildViewModel(content) {
+  const locale = LOCALE_BY_KEY[content.lang];
+
   return {
-    lang: content.lang,
+    lang: locale.htmlLang,
     title: content.title,
     description: content.description,
-    ogLocale: content.ogLocale,
-    canonicalUrl: `${SITE_ORIGIN}/${content.lang}/`,
+    ogLocale: locale.ogLocale,
+    canonicalUrl: `${SITE_ORIGIN}/${locale.path}/`,
     currentLanguageLabel: content.currentLanguageLabel,
     languageSwitcherAriaLabel: content.languageSwitcherAriaLabel,
     alternateLinks: renderAlternateLinks(content.lang),
@@ -229,26 +227,64 @@ function restoreAlphaListMarkers(html) {
 }
 
 function renderAlternateLinks(currentLang) {
-  const orderedLangs = [currentLang, ...SUPPORTED_LANGS.filter((lang) => lang !== currentLang)];
+  const orderedLocales = [
+    LOCALE_BY_KEY[currentLang],
+    ...LOCALES.filter(({ key }) => key !== currentLang),
+  ];
 
-  const links = orderedLangs.map((lang) =>
-    `  <link rel="alternate" hreflang="${escapeAttr(lang)}" href="../${escapeAttr(lang)}/">`
+  const links = orderedLocales.map((locale) =>
+    `  <link rel="alternate" hreflang="${escapeAttr(locale.hreflang)}" href="../${escapeAttr(locale.path)}/">`
   );
   links.push('  <link rel="alternate" hreflang="x-default" href="../en/">');
   return links.join('\n');
 }
 
 function renderLanguageMenuLinks(currentLang) {
-  return SUPPORTED_LANGS
-    .filter((lang) => lang !== currentLang)
-    .map((lang) =>
+  return LOCALES
+    .filter(({ key }) => key !== currentLang)
+    .map(({ key, path, hreflang }) =>
       `        ${renderAnchor({
-        href: `../${lang}/`,
-        label: languageLabels[lang],
-        hreflang: lang,
+        href: `../${path}/`,
+        label: languageLabels[key],
+        hreflang,
       })}`
     )
     .join('\n');
+}
+
+function renderSitemap() {
+  const alternates = LOCALES
+    .map(
+      ({ path, hreflang }) =>
+        `    <xhtml:link rel="alternate" hreflang="${escapeAttr(hreflang)}" href="${SITE_ORIGIN}/${escapeAttr(path)}/"/>`
+    )
+    .concat('    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/en/"/>')
+    .join('\n');
+
+  const entries = [
+    {
+      loc: `${SITE_ORIGIN}/`,
+      alternates,
+    },
+    ...LOCALES.map(({ path }) => ({
+      loc: `${SITE_ORIGIN}/${path}/`,
+      alternates,
+    })),
+  ];
+
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"',
+    '        xmlns:xhtml="http://www.w3.org/1999/xhtml">',
+    ...entries.flatMap(({ loc, alternates }) => [
+      '  <url>',
+      `    <loc>${escapeText(loc)}</loc>`,
+      alternates,
+      '  </url>',
+    ]),
+    '</urlset>',
+    '',
+  ].join('\n');
 }
 
 function renderHeroNavLinks(navLinks) {

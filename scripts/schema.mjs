@@ -1,4 +1,6 @@
-const SUPPORTED_LANGS = new Set(['en', 'ru', 'es', 'sr']);
+import { SUPPORTED_LANGS as supportedLangs } from '../site.config.mjs';
+
+const SUPPORTED_LANGS = new Set(supportedLangs);
 const DOC_LOCALES = new Set(['en', 'ru']);
 const DOC_KEYS = new Set(['agreement', 'participation', 'principles', 'council']);
 
@@ -29,7 +31,6 @@ export function validateLocaleContent(content, filePath, linkKeys) {
     'lang',
     'title',
     'description',
-    'ogLocale',
     'currentLanguageLabel',
     'languageSwitcherAriaLabel',
     'hero',
@@ -44,7 +45,6 @@ export function validateLocaleContent(content, filePath, linkKeys) {
   expectEnum(`${filePath}.lang`, content.lang, SUPPORTED_LANGS, errors);
   expectString(`${filePath}.title`, content.title, errors);
   expectString(`${filePath}.description`, content.description, errors);
-  expectString(`${filePath}.ogLocale`, content.ogLocale, errors);
   expectString(`${filePath}.currentLanguageLabel`, content.currentLanguageLabel, errors);
   expectString(`${filePath}.languageSwitcherAriaLabel`, content.languageSwitcherAriaLabel, errors);
 
