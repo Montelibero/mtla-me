@@ -11,7 +11,7 @@
     var resolveUrl = function(href) {
       href = (href || '').trim();
       if (!href) return null;
-      if (href === 'Agreement.ru.md') return 'https://raw.githubusercontent.com/Montelibero/MTLA-Documents/refs/heads/main/Internal/Agreement/Agreement.ru.md';
+      if (href === 'Agreement.ru.md') return 'https://docs.mtla.me/Agreement/Agreement.ru.html';
       if (/^https?:\/\//i.test(href) || /^mailto:/i.test(href) || /^#/.test(href) || /^\/(?!\/)/.test(href) || /^\.\.?\//.test(href)) {
         return href;
       }
