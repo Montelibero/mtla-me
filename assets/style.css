@@ -2,14 +2,20 @@
   --max: 840px;
   --pad: 1rem;
   --accent: #DBB544;
+  --accent-03: rgba(219,181,68,.03);
+  --accent-06: rgba(219,181,68,.06);
+  --accent-08: rgba(219,181,68,.08);
+  --accent-15: rgba(219,181,68,.15);
+  --accent-28: rgba(219,181,68,.28);
+  --accent-45: rgba(219,181,68,.45);
   --bg: #0b0e0e;
   --text: #e6e6e6;
   --muted: #a0a5a5;
-  --line: rgba(219,181,68,.28);
+  --line: var(--accent-28);
   --radius: 6px;
   --radius-sm: 4px;
-  --shadow: 0 0 0 1px rgba(219,181,68,.15), 0 10px 30px rgba(0,0,0,.45);
-  --glow: 0 0 12px rgba(219,181,68,.45), 0 0 28px rgba(219,181,68,.25);
+  --shadow: 0 0 0 1px var(--accent-15), 0 10px 30px rgba(0,0,0,.45);
+  --glow: 0 0 12px var(--accent-45), 0 0 28px var(--accent-28);
 }
 
 * { box-sizing: border-box; }
@@ -20,8 +26,8 @@ body {
   line-height: 1.6;
   color: var(--text);
   background-color: var(--bg);
-  background-image: radial-gradient(1200px 600px at 25% -10%, rgba(219,181,68,.08), transparent 60%),
-    radial-gradient(800px 400px at 120% 20%, rgba(219,181,68,.06), transparent 65%),
+  background-image: radial-gradient(1200px 600px at 25% -10%, var(--accent-08), transparent 60%),
+    radial-gradient(800px 400px at 120% 20%, var(--accent-06), transparent 65%),
     repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 3px);
   background-attachment: fixed;
 }
@@ -37,7 +43,7 @@ body {
 
 .hero {
   padding: 2.5rem 1.5rem;
-  background: linear-gradient(165deg, rgba(219,181,68,.06), transparent);
+  background: linear-gradient(165deg, var(--accent-06), transparent);
   text-align: center;
 }
 
@@ -47,7 +53,7 @@ body {
 
 section {
   margin: 2rem 0;
-  background: linear-gradient(165deg, rgba(219,181,68,.03), transparent);
+  background: linear-gradient(165deg, var(--accent-03), transparent);
 }
 
 .nav-links {
@@ -73,7 +79,7 @@ section {
 .nav-links a:hover {
   border-color: var(--accent);
   color: var(--accent);
-  box-shadow: 0 0 0 1px rgba(219,181,68,.25) inset;
+  box-shadow: 0 0 0 1px var(--accent-28) inset;
 }
 
 h1, h2, h3 {
@@ -82,6 +88,13 @@ h1, h2, h3 {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .03em;
+}
+
+html[lang^="ru"] h1,
+html[lang^="ru"] h2,
+html[lang^="ru"] h3 {
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 p { margin: 0 0 1rem; }
@@ -166,7 +179,7 @@ small { color: var(--muted); }
 .lang-menu a:last-child { border-bottom: 0; }
 
 .lang-menu a:hover {
-  background: rgba(219,181,68,.08);
+  background: var(--accent-08);
   color: var(--accent);
 }
 
@@ -191,18 +204,23 @@ header.wrap { padding: 0; height: 0; margin: 0; }
   line-height: 1;
   border-radius: var(--radius-sm);
   transition: transform .12s, box-shadow .12s;
-  box-shadow: 0 0 0 1px rgba(219,181,68,.15) inset;
+  box-shadow: 0 0 0 1px var(--accent-15) inset;
 }
 
 .btn:hover {
   transform: translateY(-1px);
-  background: linear-gradient(180deg, rgba(219,181,68,.12), rgba(219,181,68,.06));
+  background: linear-gradient(180deg, var(--accent-15), var(--accent-06));
   box-shadow: var(--glow);
 }
 
 .btn:active { transform: translateY(0); }
 
-.markdown { margin: 1.5rem 0; }
+.markdown {
+  margin: 1.5rem 0;
+  hyphens: auto;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
 .markdown p { margin: .5rem 0 .9rem; }
 .markdown ol, .markdown ul { padding-left: 1.2rem; }
 .markdown li { margin: .25rem 0; }
