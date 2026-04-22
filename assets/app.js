@@ -35,13 +35,55 @@
 
   // --- B) Load Markdown with minimal parser
   function parseMd(md, baseUrl) {
-    var esc = function(s) { return s.replace(/[&<>]/g, function(c) { return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); };
-    var resolveUrl = function(href) {
-      if (href === 'Agreement.ru.md') return 'https://raw.githubusercontent.com/Montelibero/MTLA-Documents/refs/heads/main/Internal/Agreement/Agreement.ru.md';
-      try { new URL(href); return href; } catch(_) {}
-      try { return new URL(href, baseUrl || location.href).toString(); } catch(_) { return href; }
+    var esc = function(s) {
+      return String(s).replace(/[&<>"']/g, function(c) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+      });
     };
-    var linkify = function(s) { return s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(_, t, h) { return '<a href="'+esc(resolveUrl(h))+'">'+esc(t)+'</a>'; }); };
+    var escAttr = esc;
+    var resolveUrl = function(href) {
+      href = (href || '').trim();
+      if (!href) return null;
+      if (href === 'Agreement.ru.md') return 'https://raw.githubusercontent.com/Montelibero/MTLA-Documents/refs/heads/main/Internal/Agreement/Agreement.ru.md';
+      if (/^https?:\/\//i.test(href) || /^mailto:/i.test(href) || /^#/.test(href) || /^\/(?!\/)/.test(href) || /^\.\.?\//.test(href)) {
+        return href;
+      }
+      if (/^\/\//.test(href) || /^[a-z][a-z0-9+.-]*:/i.test(href)) return null;
+      try {
+        var resolved = new URL(href, baseUrl || location.href);
+        if (!/^https?:$/.test(resolved.protocol)) return null;
+        return href;
+      } catch(_) {
+        return null;
+      }
+    };
+    var isExternalUrl = function(href) {
+      try {
+        var resolved = new URL(href, baseUrl || location.href);
+        return /^https?:$/.test(resolved.protocol) && resolved.origin !== location.origin;
+      } catch(_) {
+        return false;
+      }
+    };
+    var linkify = function(s) {
+      var linkPattern = /\[([^\]]+)\]\(((?:[^()]|\([^)]*\))+)\)/g;
+      var out = '';
+      var last = 0;
+      s.replace(linkPattern, function(match, t, h, offset) {
+        out += esc(s.slice(last, offset));
+        var resolved = resolveUrl(h);
+        if (!resolved) {
+          out += esc(match);
+        } else {
+          var externalAttrs = isExternalUrl(resolved) ? ' target="_blank" rel="noopener noreferrer"' : '';
+          out += '<a href="' + escAttr(resolved) + '"' + externalAttrs + '>' + esc(t) + '</a>';
+        }
+        last = offset + match.length;
+        return match;
+      });
+      out += esc(s.slice(last));
+      return out;
+    };
 
     var lines = md.replace(/\r\n/g, '\n').split('\n');
     var html = '', i = 0;
@@ -62,16 +104,16 @@
       if (/^\s*$/.test(line)) { i++; continue; }
 
       // Headers
-      if (/^=+$/.test(next)) { html += '<h1>'+esc(line.trim())+'</h1>'; i+=2; continue; }
-      if (/^-+$/.test(next)) { html += '<h2>'+esc(line.trim())+'</h2>'; i+=2; continue; }
+      if (/^=+$/.test(next)) { html += '<h1>'+linkify(line.trim())+'</h1>'; i+=2; continue; }
+      if (/^-+$/.test(next)) { html += '<h2>'+linkify(line.trim())+'</h2>'; i+=2; continue; }
       var hm = line.match(/^(#{1,6})\s+(.*)$/);
-      if (hm) { html += '<h'+hm[1].length+'>'+esc(hm[2].trim())+'</h'+hm[1].length+'>'; i++; continue; }
+      if (hm) { html += '<h'+hm[1].length+'>'+linkify(hm[2].trim())+'</h'+hm[1].length+'>'; i++; continue; }
 
       // Blockquotes
       if (/^>\s?/.test(line)) {
         var q = [];
         while (i < lines.length && /^>\s?/.test(lines[i])) q.push(lines[i++].replace(/^>\s?/, ''));
-        html += '<blockquote><p>'+linkify(esc(q.join(' ').trim()))+'</p></blockquote>';
+        html += '<blockquote><p>'+linkify(q.join(' ').trim())+'</p></blockquote>';
         continue;
       }
 
@@ -94,7 +136,7 @@
               i++;
             } else break;
           }
-          html += '<li>'+linkify(esc(buf.join(' ')))+'</li>';
+          html += '<li>'+linkify(buf.join(' '))+'</li>';
         }
         html += '</ol>';
         continue;
@@ -118,7 +160,7 @@
               i++;
             } else break;
           }
-          html += '<li>'+linkify(esc(buf2.join(' ')))+'</li>';
+          html += '<li>'+linkify(buf2.join(' '))+'</li>';
         }
         html += '</ul>';
         continue;
@@ -127,7 +169,7 @@
       // Paragraph
       var para = [];
       while (i < lines.length && !/^\s*$/.test(lines[i]) && !/^\s*[\d*+-]/.test(lines[i]) && !/^#{1,6}\s/.test(lines[i]) && !/^>\s?/.test(lines[i])) {
-        para.push(esc(lines[i++].trim()));
+        para.push(lines[i++].trim());
       }
       if (para.length) html += '<p>'+linkify(para.join(' '))+'</p>';
     }
