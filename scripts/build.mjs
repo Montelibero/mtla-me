@@ -39,6 +39,7 @@ function buildSite() {
   copyPublicAsset('robots.txt');
   copyPublicAsset('favicon.ico');
   copyPublicAsset('llms.txt');
+  copyPublicAsset('SKILL.md');
   fs.writeFileSync(path.join(outputDir, 'sitemap.xml'), renderSitemap());
 
   for (const { key: lang } of LOCALES) {
