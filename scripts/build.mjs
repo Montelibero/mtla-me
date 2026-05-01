@@ -1,19 +1,89 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
-import { DOCS_SITE_URL, LOCALES, LOCALE_BY_KEY, SITE_ORIGIN } from '../site.config.mjs';
+import { DOCS_SITE_URL, LOCALES, LOCALE_BY_KEY, SITE_ORIGIN, SUPPORTED_LANGS } from '../site.config.mjs';
 import { validateLinksMap, validateLocaleContent } from './schema.mjs';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outputDir = path.resolve(rootDir, process.argv[2] || '_site');
+
+function assertSkillSlug(name) {
+  const n = String(name || '').trim();
+  if (n.length < 1 || n.length > 64 || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(n)) {
+    throw new Error(
+      `SKILL.md frontmatter "name" must match Agent Skills id (1-64 chars, ^[a-z0-9]+(-[a-z0-9]+)*$); got ${JSON.stringify(name)}`
+    );
+  }
+  return n;
+}
+
+function parseSkillFrontmatter(raw) {
+  if (!raw.startsWith('---')) {
+    return { name: 'montelibero-mtla-info', description: '' };
+  }
+
+  const end = raw.indexOf('\n---\n', 4);
+  if (end < 0) {
+    return { name: 'montelibero-mtla-info', description: '' };
+  }
+
+  const block = raw.slice(4, end);
+  const fields = {};
+
+  for (const line of block.split('\n')) {
+    const m = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
+    if (!m) continue;
+    let value = m[2].trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    fields[m[1]] = value;
+  }
+
+  return {
+    name: fields.name || 'montelibero-mtla-info',
+    description:
+      fields.description ||
+      'Instructions for answering questions about the Montelibero Association landing site, public identity, participation model, governance documents, communications, and safe interpretation boundaries.',
+  };
+}
+
+const SKILL_SOURCE_PATH = path.join(rootDir, 'SKILL.md');
+const skillSourceBody = fs.readFileSync(SKILL_SOURCE_PATH, 'utf8');
+const SKILL_META = parseSkillFrontmatter(skillSourceBody);
+const SKILL_SLUG = assertSkillSlug(SKILL_META.name);
+const AGENT_SKILL_URL = `${SITE_ORIGIN}/.well-known/agent-skills/${SKILL_SLUG}/SKILL.md`;
+const AGENT_SKILLS_INDEX_URL = `${SITE_ORIGIN}/.well-known/agent-skills/index.json`;
+const AI_SUMMARY_URL = `${SITE_ORIGIN}/ai/summary.json`;
+const LLMS_TXT_URL = `${SITE_ORIGIN}/llms.txt`;
+const ORGANIZATION_ID = `${SITE_ORIGIN}/#organization`;
+const WEBSITE_ID = `${SITE_ORIGIN}/#website`;
+const ORGANIZATION_DESCRIPTION =
+  'A fixed-participation association and extraterritorial contractual jurisdiction created to coordinate action toward the goals of the Montelibero project and movement.';
+
+const SAME_AS_URLS = [
+  'https://montelibero.org/mtla/',
+  'https://docs.mtla.me/',
+  'https://github.com/Montelibero/MTLA-Documents',
+  'https://github.com/Montelibero/mtla-me',
+  'https://t.me/mtl_association',
+  'https://monte.wiki/ru/%D0%90%D1%81%D1%81%D0%BE%D1%86%D0%B8%D0%B0%D1%86%D0%B8%D1%8F_%D0%9C%D0%BE%D0%BD%D1%82%D0%B5%D0%BB%D0%B8%D0%B1%D0%B5%D1%80%D0%BE',
+];
+
 const DOC_PATHS = {
   agreement: 'Agreement/Agreement',
   participation: 'Participation/Participation',
   principles: 'Principles/Principles',
   council: 'Council/Council',
 };
+
+/** Agent Skills Discovery v0.2.0 (opaque id; see cloudflare/agent-skills-discovery-rfc) */
+const AGENT_SKILLS_SCHEMA = 'https://schemas.agentskills.io/discovery/0.2.0/schema.json';
+
+const CONTACT_LANGUAGES = ['en', 'ru', 'es', 'sr-ME'];
 
 const template = fs.readFileSync(path.join(rootDir, 'template.html'), 'utf8');
 const sharedLinks = loadSharedLinks();
@@ -33,13 +103,17 @@ function buildSite() {
   fs.mkdirSync(outputDir, { recursive: true });
 
   copyPublicAsset('assets');
-  copyPublicAsset('index.html');
   copyPublicAsset('CNAME');
   copyPublicAsset('.nojekyll');
   copyPublicAsset('robots.txt');
   copyPublicAsset('favicon.ico');
   copyPublicAsset('llms.txt');
-  copyPublicAsset('SKILL.md');
+
+  writeRootIndexHtml();
+  writePublishedSkillMarkdown();
+  writeAgentSkillsIndex();
+  writeAiSummaryJson();
+
   fs.writeFileSync(path.join(outputDir, 'sitemap.xml'), renderSitemap());
 
   for (const { key: lang } of LOCALES) {
@@ -49,6 +123,130 @@ function buildSite() {
     const html = renderTemplate(template, buildViewModel(localeContent[lang]));
     fs.writeFileSync(path.join(localeDir, 'index.html'), html);
   }
+}
+
+function writeRootIndexHtml() {
+  const srcPath = path.join(rootDir, 'index.html');
+  let html = fs.readFileSync(srcPath, 'utf8');
+
+  html = html
+    .replace(/\{\{\{BUILD_SITE_ORIGIN\}\}\}/g, SITE_ORIGIN)
+    .replace('{{{BUILD_ROOT_SEO_LINKS}}}', renderRootSeoLinks())
+    .replace('{{{BUILD_SUPPORTED_LANGS_JSON}}}', JSON.stringify(SUPPORTED_LANGS))
+    .replace('{{{BUILD_REDIRECT_LOCALE_TEST_LINE}}}', renderRedirectLocaleTestLine())
+    .replace('{{{BUILD_ROOT_HREFLANG_LINKS}}}', renderRootHreflangLinks())
+    .replace('{{{BUILD_ROOT_JSON_LD}}}', renderRootJsonLd())
+    .replace('{{{BUILD_NOSCRIPT_LANG_LINKS}}}', renderNoscriptLangLinks());
+
+  if (html.includes('{{{BUILD_')) {
+    throw new Error('index.html: unreplaced BUILD_* placeholder(s) remain after build');
+  }
+
+  fs.writeFileSync(path.join(outputDir, 'index.html'), html);
+}
+
+function renderRootSeoLinks() {
+  const origin = escapeAttr(SITE_ORIGIN);
+  return [
+    `  <link rel="canonical" href="${origin}/">`,
+    `  <link rel="help" type="text/plain" href="${origin}/llms.txt" title="LLMs text">`,
+    `  <link rel="help" type="text/markdown" href="${escapeAttr(AGENT_SKILL_URL)}" title="AI agent instructions">`,
+    `  <link rel="index" type="application/json" href="${origin}/.well-known/agent-skills/index.json" title="Agent skills index">`,
+    `  <link rel="alternate" type="application/json" href="${origin}/ai/summary.json" title="AI site summary">`,
+  ].join('\n');
+}
+
+function renderRootHreflangLinks() {
+  return LOCALES.map(
+    (locale) =>
+      `  <link rel="alternate" hreflang="${escapeAttr(locale.hreflang)}" href="./${escapeAttr(locale.path)}/">`
+  )
+    .concat(['  <link rel="alternate" hreflang="x-default" href="./en/">'])
+    .join('\n');
+}
+
+function renderRedirectLocaleTestLine() {
+  const alt = LOCALES.map(({ path }) => path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+  return `        if (!/\/(?:${alt})(\\/|$)/.test(path)) {`;
+}
+
+function renderNoscriptLangLinks() {
+  return LOCALES.map((locale) => {
+    const label = languageLabels[locale.key];
+    const href = `./${locale.path}/`;
+    return `        <a hreflang="${escapeAttr(locale.hreflang)}" class="btn" href="${escapeAttr(href)}">${escapeText(label)}</a>`;
+  }).join('\n');
+}
+
+function writePublishedSkillMarkdown() {
+  const dir = path.join(outputDir, '.well-known', 'agent-skills', SKILL_SLUG);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, 'SKILL.md'), skillSourceBody);
+}
+
+function writeAgentSkillsIndex() {
+  const digest = crypto.createHash('sha256').update(skillSourceBody).digest('hex');
+
+  const payload = {
+    $schema: AGENT_SKILLS_SCHEMA,
+    skills: [
+      {
+        name: SKILL_SLUG,
+        type: 'skill-md',
+        description: SKILL_META.description,
+        url: AGENT_SKILL_URL,
+        digest: `sha256:${digest}`,
+      },
+    ],
+  };
+
+  const dir = path.join(outputDir, '.well-known', 'agent-skills');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, 'index.json'), `${JSON.stringify(payload, null, 2)}\n`);
+}
+
+function writeAiSummaryJson() {
+  const en = localeContent.en;
+  const enBase = `${SITE_ORIGIN}/en/`;
+
+  const languages = LOCALES.map((locale) => ({
+    code: locale.hreflang,
+    url: `${SITE_ORIGIN}/${locale.path}/`,
+  }));
+
+  const payload = {
+    name: 'Montelibero Association',
+    alternateName: 'MTLA',
+    url: `${SITE_ORIGIN}/`,
+    description: `${en.hero.title}: ${en.hero.lead}. ${en.hero.description}`.replace(/\s+/g, ' ').trim(),
+    languages,
+    primarySections: [
+      { name: en.agreement.title, url: `${enBase}#agreement` },
+      { name: en.bodies.title, url: `${enBase}#bodies` },
+      { name: en.documents.title, url: `${enBase}#documents` },
+    ],
+    referenceSources: [
+      'https://docs.mtla.me/',
+      'https://docs.mtla.me/llms.txt',
+      'https://github.com/Montelibero/MTLA-Documents',
+      'https://montelibero.org/mtla/',
+      'https://montelibero.org/2023/08/09/montelibero_association_agreement/',
+    ],
+    agentResources: {
+      llms: LLMS_TXT_URL,
+      skill: AGENT_SKILL_URL,
+      skillsIndex: AGENT_SKILLS_INDEX_URL,
+    },
+    boundaries: [
+      'The site is about the Montelibero Association, not the entire Montelibero movement or ecosystem.',
+      'MTLA is one structure within the broader Montelibero ecosystem and does not claim sole representation of the movement.',
+      'Governance, participation, token/status, and procedural claims should be checked against current official MTLA documents.',
+    ],
+  };
+
+  const dir = path.join(outputDir, 'ai');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, 'summary.json'), `${JSON.stringify(payload, null, 2)}\n`);
 }
 
 function loadSharedLinks() {
@@ -116,9 +314,14 @@ function buildViewModel(content) {
     description: content.description,
     ogLocale: locale.ogLocale,
     canonicalUrl: `${SITE_ORIGIN}/${locale.path}/`,
+    llmsTxtUrl: LLMS_TXT_URL,
+    agentSkillUrl: AGENT_SKILL_URL,
+    agentSkillsIndexUrl: AGENT_SKILLS_INDEX_URL,
+    aiSummaryUrl: AI_SUMMARY_URL,
     currentLanguageLabel: content.currentLanguageLabel,
     languageSwitcherAriaLabel: content.languageSwitcherAriaLabel,
     alternateLinks: renderAlternateLinks(content.lang),
+    jsonLd: renderLocaleJsonLd(content, locale),
     languageMenuLinks: renderLanguageMenuLinks(content.lang),
     heroTitle: content.hero.title,
     heroLead: content.hero.lead,
@@ -240,6 +443,97 @@ function renderAlternateLinks(currentLang) {
   return links.join('\n');
 }
 
+function buildOrganizationEntity() {
+  return {
+    '@type': 'Organization',
+    '@id': ORGANIZATION_ID,
+    name: 'Montelibero Association',
+    alternateName: 'MTLA',
+    url: SITE_ORIGIN,
+    description: ORGANIZATION_DESCRIPTION,
+    sameAs: SAME_AS_URLS,
+    contactPoint: [
+      {
+        '@type': 'ContactPoint',
+        contactType: 'public participation',
+        url: sharedLinks.joinBot,
+        availableLanguage: CONTACT_LANGUAGES,
+      },
+      {
+        '@type': 'ContactPoint',
+        contactType: 'public announcements',
+        url: sharedLinks.telegramChannel,
+        availableLanguage: CONTACT_LANGUAGES,
+      },
+    ],
+  };
+}
+
+function buildWebSiteEntity() {
+  return {
+    '@type': 'WebSite',
+    '@id': WEBSITE_ID,
+    name: 'Montelibero Association',
+    alternateName: 'MTLA.me',
+    url: SITE_ORIGIN,
+    inLanguage: LOCALES.map(({ htmlLang }) => htmlLang),
+    publisher: { '@id': ORGANIZATION_ID },
+    potentialAction: [
+      {
+        '@type': 'ReadAction',
+        target: LOCALES.map(({ path }) => `${SITE_ORIGIN}/${path}/`),
+      },
+    ],
+  };
+}
+
+function stringifyJsonLdGraph(graph) {
+  return indentHtml(
+    JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }, null, 2).replace(/<\/script/gi, '<\\/script'),
+    4
+  );
+}
+
+function renderLocaleJsonLd(content, locale) {
+  const pageUrl = `${SITE_ORIGIN}/${locale.path}/`;
+  const graph = [
+    buildOrganizationEntity(),
+    buildWebSiteEntity(),
+    {
+      '@type': 'WebPage',
+      '@id': `${pageUrl}#webpage`,
+      url: pageUrl,
+      name: content.title,
+      description: content.description,
+      inLanguage: locale.htmlLang,
+      isPartOf: { '@id': WEBSITE_ID },
+      about: { '@id': ORGANIZATION_ID },
+      mainEntity: { '@id': ORGANIZATION_ID },
+    },
+  ];
+
+  return stringifyJsonLdGraph(graph);
+}
+
+function renderRootJsonLd() {
+  const graph = [
+    buildOrganizationEntity(),
+    buildWebSiteEntity(),
+    {
+      '@type': 'WebPage',
+      '@id': `${SITE_ORIGIN}/#webpage`,
+      url: `${SITE_ORIGIN}/`,
+      name: 'Montelibero Association',
+      description: 'Language selection page for the Montelibero Association website.',
+      inLanguage: LOCALES.map(({ htmlLang }) => htmlLang),
+      isPartOf: { '@id': WEBSITE_ID },
+      about: { '@id': ORGANIZATION_ID },
+    },
+  ];
+
+  return stringifyJsonLdGraph(graph);
+}
+
 function renderLanguageMenuLinks(currentLang) {
   return LOCALES
     .filter(({ key }) => key !== currentLang)
@@ -259,7 +553,7 @@ function renderSitemap() {
       ({ path, hreflang }) =>
         `    <xhtml:link rel="alternate" hreflang="${escapeAttr(hreflang)}" href="${SITE_ORIGIN}/${escapeAttr(path)}/"/>`
     )
-    .concat('    <xhtml:link rel="alternate" hreflang="x-default" href="https://mtla.me/en/"/>')
+    .concat(`    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_ORIGIN}/en/"/>`)
     .join('\n');
 
   const entries = [

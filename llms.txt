@@ -18,6 +18,7 @@ Important notes:
 - [https://mtla.me/ru/](https://mtla.me/ru/): Russian landing page.
 - [https://mtla.me/es/](https://mtla.me/es/): Spanish landing page.
 - [https://mtla.me/sr/](https://mtla.me/sr/): Montenegrin landing page.
+- [Agent skill for assistants](https://mtla.me/.well-known/agent-skills/montelibero-mtla-info/SKILL.md): Machine-oriented instructions for questions about this landing site and MTLA public identity (mirrors repository `SKILL.md`; see `/.well-known/agent-skills/index.json` for discovery).
 
 ## Core reference sources
 - [Montelibero.org about MTLA](https://montelibero.org/mtla/): Public MTLA overview page on the main MTL website with key links, communications, and normative references.

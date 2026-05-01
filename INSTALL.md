@@ -18,16 +18,16 @@ The production domain for this repository is `mtla.me`. The generated locale URL
 
 ## Custom domain or fork
 
-If you deploy a fork under another domain, update these files before the first push:
+If you deploy a fork under another domain, update these before the first push:
 
 - `CNAME`
-- `index.html`
-- `scripts/build.mjs`
-- `sitemap.xml`
-- `robots.txt`
-- `llms.txt`
+- `site.config.mjs` (`SITE_ORIGIN`, locales)
+- `robots.txt` (Sitemap URL if you keep an absolute `Sitemap:` line)
+- `llms.txt` (absolute links)
 
-This repository is configured for `mtla.me`, so leaving those values unchanged on a fork will produce working HTML but incorrect canonical/SEO metadata.
+Built output (`_site/`) takes canonical URLs, sitemap, JSON-LD, agent discovery links, `ai/summary.json`, and `.well-known/agent-skills/index.json` from `site.config.mjs` and the build script. The source `index.html` uses `{{{BUILD_*}}}` markers and is not meant to be served unbuilt.
+
+This repository is configured for `mtla.me`, so leaving `SITE_ORIGIN` unchanged on a fork will produce incorrect canonical/SEO metadata for your domain.
 
 ## Local build
 

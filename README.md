@@ -6,7 +6,7 @@ Minimal multilingual landing page for the Montelibero Association.
 
 ```text
 .
-├── index.html             # Root language redirect / noscript chooser
+├── index.html             # Root redirect / noscript ({{{BUILD_*}}} filled by scripts/build.mjs)
 ├── template.html          # Shared HTML template for locale pages
 ├── assets/                # CSS and minimal client-side JS
 ├── i18n/
@@ -23,7 +23,7 @@ Minimal multilingual landing page for the Montelibero Association.
 
 ## How it works
 
-- `scripts/build.mjs` renders locale pages from `template.html` and `i18n/*/content.json`
+- `scripts/build.mjs` renders locale pages from `template.html` and `i18n/*/content.json`, writes `_site/index.html` from `index.html` placeholders, copies `SKILL.md` to `/.well-known/agent-skills/<name>/SKILL.md`, and generates `.well-known/agent-skills/index.json` and `ai/summary.json`
 - `documents/Agreement.en.md` and `documents/Agreement.ru.md` are rendered at build time and inlined into the locale HTML
 - Shared repeated URLs live in `i18n/links.json`
 - `scripts/schema.mjs` validates locale content before render and fails with field-level errors

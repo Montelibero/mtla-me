@@ -14,10 +14,11 @@
   <meta property="og:description" content="Language selection page for the Montelibero Association website.">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="en_US">
-  <meta property="og:url" content="https://mtla.me/">
+  <meta property="og:url" content="{{{BUILD_SITE_ORIGIN}}}/">
   <meta name="twitter:card" content="summary">
+{{{BUILD_ROOT_SEO_LINKS}}}
   <script>
-    window.SUPPORTED_LANGS = ['en', 'ru', 'es', 'sr'];
+    window.SUPPORTED_LANGS = {{{BUILD_SUPPORTED_LANGS_JSON}}};
     (function () {
       try {
         var supported = window.SUPPORTED_LANGS;
@@ -55,20 +56,18 @@
         var path = window.location.pathname.replace(/\/index\.html\/?$/, '/');
         if (!path.endsWith('/')) path += '/';
 
-        if (!/\/(en|ru|es|sr)(\/|$)/.test(path)) {
-          window.location.replace(path + lang + '/');
-        }
+{{{BUILD_REDIRECT_LOCALE_TEST_LINE}}}
       } catch (e) {
         // Fall back to the manual picker in <noscript>.
       }
     })();
   </script>
 
-  <link rel="alternate" hreflang="en" href="./en/">
-  <link rel="alternate" hreflang="ru" href="./ru/">
-  <link rel="alternate" hreflang="es" href="./es/">
-  <link rel="alternate" hreflang="sr-ME" href="./sr/">
-  <link rel="alternate" hreflang="x-default" href="./en/">
+{{{BUILD_ROOT_HREFLANG_LINKS}}}
+
+  <script type="application/ld+json">
+{{{BUILD_ROOT_JSON_LD}}}
+  </script>
 
   <link rel="stylesheet" href="./assets/style.css">
 </head>
@@ -78,10 +77,7 @@
       <h1>Choose language</h1>
       <p><strong>JavaScript is disabled.</strong> Please select language manually:</p>
       <p>
-        <a hreflang="en" class="btn" href="./en/">English</a>
-        <a hreflang="ru" class="btn" href="./ru/">Русский</a>
-        <a hreflang="es" class="btn" href="./es/">Español</a>
-        <a hreflang="sr-ME" class="btn" href="./sr/">Crnogorski</a>
+{{{BUILD_NOSCRIPT_LANG_LINKS}}}
       </p>
     </main>
   </noscript>

@@ -17,9 +17,16 @@
   <meta property="og:url" content="{{@canonicalUrl}}">
   <meta name="twitter:card" content="summary">
   <link rel="canonical" href="{{@canonicalUrl}}">
+  <link rel="help" type="text/plain" href="{{@llmsTxtUrl}}" title="LLMs text">
+  <link rel="help" type="text/markdown" href="{{@agentSkillUrl}}" title="AI agent instructions">
+  <link rel="index" type="application/json" href="{{@agentSkillsIndexUrl}}" title="Agent skills index">
+  <link rel="alternate" type="application/json" href="{{@aiSummaryUrl}}" title="AI site summary">
 
 {{{alternateLinks}}}
 
+  <script type="application/ld+json">
+{{{jsonLd}}}
+  </script>
   <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
