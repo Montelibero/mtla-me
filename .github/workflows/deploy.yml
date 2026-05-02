@@ -38,6 +38,7 @@ jobs:
         with:
           path: _site
           name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+          include-hidden-files: true
 
       
       - name: Deploy to GitHub Pages
