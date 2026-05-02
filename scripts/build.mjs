@@ -123,6 +123,8 @@ function buildSite() {
     const html = renderTemplate(template, buildViewModel(localeContent[lang]));
     fs.writeFileSync(path.join(localeDir, 'index.html'), html);
   }
+
+  validateBuiltSite();
 }
 
 function writeRootIndexHtml() {
@@ -167,7 +169,13 @@ function renderRootHreflangLinks() {
 
 function renderRedirectLocaleTestLine() {
   const alt = LOCALES.map(({ path }) => path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-  return `        if (!/\/(?:${alt})(\\/|$)/.test(path)) {`;
+  const pattern = `/(?:${alt})(/|$)`;
+
+  return [
+    `        if (!new RegExp(${JSON.stringify(pattern)}).test(path)) {`,
+    `          window.location.replace(path + lang + '/');`,
+    `        }`,
+  ].join('\n');
 }
 
 function renderNoscriptLangLinks() {
@@ -247,6 +255,97 @@ function writeAiSummaryJson() {
   const dir = path.join(outputDir, 'ai');
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'summary.json'), `${JSON.stringify(payload, null, 2)}\n`);
+}
+
+function validateBuiltSite() {
+  const rootHtmlPath = path.join(outputDir, 'index.html');
+  const htmlPaths = [
+    rootHtmlPath,
+    ...LOCALES.map(({ path: localePath }) => path.join(outputDir, localePath, 'index.html')),
+  ];
+
+  for (const filePath of htmlPaths) {
+    const html = fs.readFileSync(filePath, 'utf8');
+
+    if (html.includes('{{{BUILD_')) {
+      throw new Error(`${filePath}: unreplaced BUILD_* placeholder remains`);
+    }
+
+    validateInlineJsonLd(html, filePath);
+  }
+
+  validateRootRedirectScript(fs.readFileSync(rootHtmlPath, 'utf8'), rootHtmlPath);
+  validateJsonFile(path.join(outputDir, '.well-known', 'agent-skills', 'index.json'));
+  validateJsonFile(path.join(outputDir, 'ai', 'summary.json'));
+  validatePublishedSkillDigest();
+}
+
+function validateRootRedirectScript(html, filePath) {
+  const match = html.match(/<script>\s*([\s\S]*?)\s*<\/script>/);
+
+  if (!match) {
+    throw new Error(`${filePath}: root redirect script not found`);
+  }
+
+  try {
+    new Function(match[1]);
+  } catch (error) {
+    throw new Error(`${filePath}: root redirect script is invalid: ${error.message}`);
+  }
+
+  if (!match[1].includes("window.location.replace(path + lang + '/')")) {
+    throw new Error(`${filePath}: root redirect script does not redirect to the selected locale`);
+  }
+}
+
+function validateInlineJsonLd(html, filePath) {
+  const matches = html.matchAll(/<script type="application\/ld\+json">\s*([\s\S]*?)\s*<\/script>/g);
+  let count = 0;
+
+  for (const match of matches) {
+    count += 1;
+
+    try {
+      JSON.parse(match[1]);
+    } catch (error) {
+      throw new Error(`${filePath}: invalid JSON-LD: ${error.message}`);
+    }
+  }
+
+  if (count !== 1) {
+    throw new Error(`${filePath}: expected exactly one JSON-LD script, found ${count}`);
+  }
+}
+
+function validateJsonFile(filePath) {
+  try {
+    JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (error) {
+    throw new Error(`${filePath}: invalid JSON: ${error.message}`);
+  }
+}
+
+function validatePublishedSkillDigest() {
+  const indexPath = path.join(outputDir, '.well-known', 'agent-skills', 'index.json');
+  const index = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
+  const skill = index.skills?.find(({ name }) => name === SKILL_SLUG);
+
+  if (!skill) {
+    throw new Error(`${indexPath}: missing skill entry for ${SKILL_SLUG}`);
+  }
+
+  const expectedDigest = `sha256:${crypto.createHash('sha256').update(skillSourceBody).digest('hex')}`;
+
+  if (skill.digest !== expectedDigest) {
+    throw new Error(`${indexPath}: digest mismatch for ${SKILL_SLUG}`);
+  }
+
+  const publishedSkillPath = path.join(outputDir, '.well-known', 'agent-skills', SKILL_SLUG, 'SKILL.md');
+  const publishedDigest = `sha256:${crypto.createHash('sha256').update(fs.readFileSync(publishedSkillPath)).digest('hex')}`;
+
+  if (publishedDigest !== expectedDigest) {
+    throw new Error(`${publishedSkillPath}: published skill digest does not match index`);
+  }
 }
 
 function loadSharedLinks() {
