@@ -103,6 +103,8 @@ function buildSite() {
   fs.mkdirSync(outputDir, { recursive: true });
 
   copyPublicAsset('assets');
+  copyPublicAsset('images');
+  copyPublicAsset('.well-known');
   copyPublicAsset('CNAME');
   copyPublicAsset('.nojekyll');
   copyPublicAsset('robots.txt');

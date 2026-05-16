@@ -1,0 +1,42 @@
+VERSION = "2.7.0"
+NETWORK_PASSPHRASE = "Public Global Stellar Network ; September 2015"
+ACCOUNTS = [
+  "GCNVDZIHGX473FEI7IXCUAEXUJ4BGCKEMHF36VYP5EMS7PX2QBLAMTLA", # MTLA main account controlled by Council multisignature 
+  "GDGC46H4MQKRW3TZTNCWUU6R2C7IPXGN7HQLZBJTNQO6TW7ZOS6MSECR", # MTLA Secretarial official account
+  "GDEK5KGFA3WCG3F2MLSXFGLR4T4M6W6BMGWY6FBDSDQM6HXFMRSTEWBW", # MTLA  Basic Income Bot account
+  "GB5V3IPTB3DGJ3NHEEQ4YNTGED56RAWGSDRQLOSFXOW3JKNFAJUAMTLC", # Libertarian Court account, established and proposed by the MTLA
+  "GCE67FN5AQN57YRMIVBPDHSFRVRC6JINL6OZHCNJNBJF3Z6MPZMTLMLM", # MTLA Fund for the Integration Incentive Subprogram
+  "GDRPMWIVNLGGZKD5ECV6LXGNIP3WOI2Z2ELJWN3VMI66H5HBGOMTLMCC", # Mission Control Center of the Montelibero Project account
+  "GDRXBG5GVIUJWTAJDQE536JC5MDT5AH3MMCZIJCEGVAT2GEM2TMCROWD", # Issuer of MTLCrowd crowdfunding token
+]
+
+[DOCUMENTATION]
+ORG_NAME = "Montelibero Association"
+ORG_URL = "https://mtla.me/"
+ORG_LOGO = "https://mtla.me/images/stellar-logo.png"
+ORG_DESCRIPTION = "Montelibero Association is a structure with fixed membership, extraterritorial contract jurisdiction related to the Montelibero movement."
+ORG_OFFICIAL_EMAIL = "common@mtla.me"
+ORG_SUPPORT_EMAIL = "common@mtla.me"
+ORG_GITHUB = "Montelibero"
+
+[[CURRENCIES]]
+code = "MTLAP"
+issuer = "GCNVDZIHGX473FEI7IXCUAEXUJ4BGCKEMHF36VYP5EMS7PX2QBLAMTLA"
+is_asset_anchored = false
+is_unlimited = true
+status = "live"
+display_decimals = 0
+name = "MTLAP"
+desc = "MTLAP is a Stellar asset used as membership confirmation for individual participants in the Montelibero Association."
+image = "https://mtla.me/images/stellar-logo-mtlap.png"
+
+[[CURRENCIES]]
+code = "MTLAC"
+issuer = "GCNVDZIHGX473FEI7IXCUAEXUJ4BGCKEMHF36VYP5EMS7PX2QBLAMTLA"
+is_asset_anchored = false
+is_unlimited = true
+status = "live"
+display_decimals = 0
+name = "MTLAC"
+desc = "MTLAC is a Stellar asset used as membership confirmation for organizations participating in the Montelibero Association."
+image = "https://mtla.me/images/stellar-logo-mtlac.png"
