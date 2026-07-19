@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="{{@lang}}" data-no-redirect>
+<html lang="{{@lang}}">
 <head>
   <meta charset="utf-8">
   <title>{{title}}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="{{@description}}">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; frame-ancestors 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; form-action 'none'; base-uri 'self'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <link rel="icon" href="../favicon.ico" sizes="any">
   <meta name="theme-color" content="#0b0e0e">
@@ -14,6 +14,7 @@
   <meta property="og:description" content="{{@description}}">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="{{@ogLocale}}">
+{{{ogAlternateLocales}}}
   <meta property="og:url" content="{{@canonicalUrl}}">
   <meta name="twitter:card" content="summary">
   <link rel="canonical" href="{{@canonicalUrl}}">
@@ -27,9 +28,11 @@
   <script type="application/ld+json">
 {{{jsonLd}}}
   </script>
-  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="{{@stylesheetHref}}">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">{{skipToContentLabel}}</a>
+
   <header class="wrap">
     <details class="lang">
       <summary class="lang-current">{{currentLanguageLabel}}</summary>
@@ -39,24 +42,24 @@
     </details>
   </header>
 
-  <main class="wrap">
+  <main id="main-content" class="wrap" tabindex="-1">
     <section class="hero">
       <h1>{{heroTitle}}</h1>
       <p class="lead">{{heroLead}}</p>
       <p>{{heroDescription}}</p>
-      <nav class="nav-links">
+      <nav class="nav-links" aria-label="{{@heroNavAriaLabel}}">
 {{{heroNavLinks}}}
       </nav>
       <p><a class="btn" href="{{@heroJoinHref}}">{{heroJoinLabel}}</a></p>
     </section>
 
     <section id="agreement">
-      <h2>{{agreementTitle}}</h2>
+      <h2 id="agreement-heading">{{agreementTitle}}</h2>
       <div>
-        <article class="markdown">
+        <article class="markdown" lang="{{@agreementLang}}" aria-labelledby="agreement-heading">
 {{{agreementHtml}}}
         </article>
-        <p><a href="{{@agreementOriginalUrl}}" target="_blank" rel="noopener noreferrer">{{agreementOriginalLabel}}</a> {{agreementOriginalNote}}</p>
+        <p><a href="{{@agreementOriginalUrl}}" hreflang="{{@agreementHreflang}}">{{agreementOriginalLabel}}</a> {{agreementOriginalNote}}</p>
       </div>
     </section>
 

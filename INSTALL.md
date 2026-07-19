@@ -33,10 +33,26 @@ This repository is configured for `mtla.me`, so leaving `SITE_ORIGIN` unchanged 
 
 ```bash
 npm ci
-npm run build
+npm run check
 ```
 
-The build output is written to `_site/`.
+The command verifies the agreement provenance record, recreates `_site/`, and runs the regression suite. Use `npm run build` only when tests have already passed and you need to recreate the artifact.
+
+## Updating the agreement
+
+The two files in `documents/` are controlled copies of the authoritative [MTLA-Documents repository](https://github.com/Montelibero/MTLA-Documents), not independent translations.
+
+1. Check out the exact authoritative commit to a separate local directory.
+2. Copy `Internal/Agreement/Agreement.en.md` and `Internal/Agreement/Agreement.ru.md` into `documents/` without editing their contents.
+3. In `documents/UPSTREAM.json`, update `commit`, `verifiedAt`, and both SHA-256 values. Keep full 40-character commit and 64-character lowercase hashes.
+4. Verify the controlled copies against that checkout:
+
+```bash
+npm run verify:documents -- --upstream-dir /path/to/MTLA-Documents
+npm run check
+```
+
+Commit the two Markdown files and `UPSTREAM.json` together. A mismatched or unrecorded document makes the build fail.
 
 ## Local preview
 
@@ -44,13 +60,17 @@ The build output is written to `_site/`.
 ./serve.sh
 ```
 
-Then open `http://localhost:8080`.
+Then open `http://127.0.0.1:8080`.
 
 ## Docker preview
 
 ```bash
 docker build -t mtla-landing .
-docker run --rm -p 8080:80 mtla-landing
+docker run --rm -p 127.0.0.1:8080:80 mtla-landing
 ```
 
 The Docker image builds the same `_site/` artifact and serves it with nginx.
+
+## Production controls
+
+The workflow validates pull requests and deploys the resulting `v2` commit using immutable action commit SHAs. Complete and record the external controls in [PRODUCTION.md](PRODUCTION.md) before treating the site as the Association's official publication.

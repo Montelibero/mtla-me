@@ -1,7 +1,5 @@
 services:
   mtla-web:
     build: .
-    container_name: mtla-landing
     ports:
-      - "8080:80"
-    restart: unless-stopped
+      - "127.0.0.1:8080:80"

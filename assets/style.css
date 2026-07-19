@@ -20,6 +20,8 @@
 
 * { box-sizing: border-box; }
 
+.redirecting .root-fallback { display: none; }
+
 body {
   margin: 0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
@@ -73,7 +75,7 @@ section {
   letter-spacing: .04em;
   font-size: .85rem;
   text-decoration: none;
-  transition: all .15s;
+  transition: border-color .15s, color .15s, box-shadow .15s;
 }
 
 .nav-links a:hover {
@@ -86,15 +88,9 @@ h1, h2, h3 {
   margin: 1.2em 0 .5em;
   line-height: 1.15;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .03em;
-}
-
-html[lang^="ru"] h1,
-html[lang^="ru"] h2,
-html[lang^="ru"] h3 {
   text-transform: none;
-  letter-spacing: 0;
+  letter-spacing: normal;
+  overflow-wrap: break-word;
 }
 
 p { margin: 0 0 1rem; }
@@ -107,7 +103,35 @@ a {
 
 a:hover { text-shadow: 0 0 1px; }
 
+a:visited { color: #c9aa4f; }
+
 small { color: var(--muted); }
+
+.skip-link {
+  position: fixed;
+  top: .5rem;
+  left: .5rem;
+  z-index: 1100;
+  padding: .55rem .8rem;
+  color: var(--bg);
+  background: var(--accent);
+  border: 0;
+  border-radius: var(--radius-sm);
+  transform: translateY(calc(-100% - 1rem));
+}
+
+.skip-link:focus {
+  color: var(--bg);
+  transform: translateY(0);
+}
+
+.language-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+
+.doc-language { margin-inline-start: .35rem; }
 
 /* Language dropdown */
 .lang {
@@ -153,13 +177,14 @@ small { color: var(--muted); }
 .lang-menu {
   position: absolute;
   top: 100%;
-  left: 0;
+  right: 0;
+  left: auto;
   margin-top: .3rem;
   background: var(--bg);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
-  min-width: 150px;
+  width: min(12rem, calc(100vw - 1.5rem));
   display: none;
   overflow: hidden;
 }
@@ -216,7 +241,8 @@ header.wrap { padding: 0; height: 0; margin: 0; }
 .btn:active { transform: translateY(0); }
 
 .markdown {
-  margin: 1.5rem 0;
+  max-width: 70ch;
+  margin: 1.5rem auto;
   hyphens: auto;
   word-break: normal;
   overflow-wrap: break-word;
@@ -225,6 +251,38 @@ header.wrap { padding: 0; height: 0; margin: 0; }
 .markdown p { margin: .5rem 0 .9rem; }
 .markdown ol, .markdown ul { padding-left: 1.2rem; }
 .markdown li { margin: .25rem 0; }
+
+@media (max-width: 40rem) {
+  :root { --pad: .75rem; }
+
+  body { background-attachment: scroll; }
+
+  main.wrap { padding-top: 4rem; }
+
+  .hero,
+  section {
+    padding: 1.5rem 1rem;
+  }
+
+  .hero { padding-block: 2rem; }
+  section { margin: 1.25rem 0; }
+
+  .lang {
+    top: .5rem;
+    right: .5rem;
+  }
+
+  .lang-menu {
+    width: min(12rem, calc(100vw - 1rem));
+  }
+
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.35rem; }
+
+  .nav-links {
+    gap: .45rem;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

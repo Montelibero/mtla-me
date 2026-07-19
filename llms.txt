@@ -32,8 +32,8 @@ Important notes:
 - [Participation.ru.html](https://docs.mtla.me/Participation/Participation.ru.html): Participation regulations. Addendum to the Agreement, providing more details on participation.
 - [Principles.en.html](https://docs.mtla.me/Principles/Principles.en.html): English version of the Principles text. The Association's principles serve as a guide for decision-making.
 - [Council.ru.html](https://docs.mtla.me/Council/Council.ru.html): Council regulations. Regulations for the work of the "liquid-democracy parliament".
-- [PII Standard](https://github.com/MTL-Association/Documents/blob/main/Internal/Personal%20data%20working%20standard/Standard.ru.md): Public personal-data handling and verification standard.
-- [BOR Standard](https://github.com/Montelibero/MTLA-Documents/blob/main/Internal/BlockchainizationOfRelationships/BlockchainizationOfRelationships.ru.md): A standard for describing relationships on the blockchain (Blockchain Social Network).
+- [PII Standard](https://docs.mtla.me/Personal%20data%20working%20standard/Standard.ru.html): Public personal-data handling and verification standard.
+- [BOR Standard](https://docs.mtla.me/BlockchainizationOfRelationships/BlockchainizationOfRelationships.ru.html): A standard for describing relationships on the blockchain (Blockchain Social Network).
 
 ## Participation and communications
 - [MTLA join telegram bot](https://t.me/MTLA_join_bot): Public Telegram bot for the participation flow.

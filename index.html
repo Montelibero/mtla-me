@@ -1,11 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-language-config="{{{BUILD_LANGUAGE_CONFIG_ATTR}}}">
 <head>
   <meta charset="utf-8">
   <title>Montelibero Association</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Language selection page for the Montelibero Association website.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; frame-ancestors 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-{{{BUILD_REDIRECT_SCRIPT_HASH}}}'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; form-action 'none'; base-uri 'self'">
+  <script>{{{BUILD_REDIRECT_SCRIPT}}}</script>
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <link rel="icon" href="./favicon.ico" sizes="any">
   <meta name="theme-color" content="#0b0e0e">
@@ -17,51 +18,6 @@
   <meta property="og:url" content="{{{BUILD_SITE_ORIGIN}}}/">
   <meta name="twitter:card" content="summary">
 {{{BUILD_ROOT_SEO_LINKS}}}
-  <script>
-    window.SUPPORTED_LANGS = {{{BUILD_SUPPORTED_LANGS_JSON}}};
-    (function () {
-      try {
-        var supported = window.SUPPORTED_LANGS;
-        var url = new URL(window.location.href);
-        var queryLang = url.searchParams.get('lang');
-        var storedLang = null;
-        var lang = null;
-
-        try {
-          storedLang = localStorage.getItem('lang');
-        } catch (_) {}
-
-        function pickLang(langs) {
-          for (var i = 0; i < langs.length; i++) {
-            var value = (langs[i] || '').toLowerCase();
-            var prefix = value.slice(0, 2);
-            if (supported.indexOf(value) >= 0) return value;
-            if (supported.indexOf(prefix) >= 0) return prefix;
-          }
-          return null;
-        }
-
-        lang = (queryLang && supported.indexOf(queryLang) >= 0)
-          ? queryLang
-          : (storedLang && supported.indexOf(storedLang) >= 0)
-            ? storedLang
-          : pickLang(navigator.languages || [navigator.language]) || supported[0];
-
-        if (queryLang && supported.indexOf(queryLang) >= 0) {
-          try {
-            localStorage.setItem('lang', queryLang);
-          } catch (_) {}
-        }
-
-        var path = window.location.pathname.replace(/\/index\.html\/?$/, '/');
-        if (!path.endsWith('/')) path += '/';
-
-{{{BUILD_REDIRECT_LOCALE_TEST_LINE}}}
-      } catch (e) {
-        // Fall back to the manual picker in <noscript>.
-      }
-    })();
-  </script>
 
 {{{BUILD_ROOT_HREFLANG_LINKS}}}
 
@@ -69,17 +25,23 @@
 {{{BUILD_ROOT_JSON_LD}}}
   </script>
 
-  <link rel="stylesheet" href="./assets/style.css">
+  <link rel="stylesheet" href="./assets/style.css?v={{{BUILD_ASSET_VERSION}}}">
+  <noscript><link rel="stylesheet" href="./assets/noscript.css?v={{{BUILD_ASSET_VERSION}}}"></noscript>
 </head>
 <body>
-  <noscript>
-    <main class="wrap">
-      <h1>Choose language</h1>
-      <p><strong>JavaScript is disabled.</strong> Please select language manually:</p>
-      <p>
-{{{BUILD_NOSCRIPT_LANG_LINKS}}}
+  <main class="wrap root-fallback">
+    <h1>Choose language</h1>
+    <p class="root-fallback-js">Automatic language selection failed. Please select a language:</p>
+    <p class="language-options root-fallback-js">
+{{{BUILD_MANUAL_LANG_LINKS}}}
+    </p>
+
+    <noscript>
+      <p><strong>JavaScript is disabled.</strong> Please select a language:</p>
+      <p class="language-options">
+{{{BUILD_MANUAL_LANG_LINKS}}}
       </p>
-    </main>
-  </noscript>
+    </noscript>
+  </main>
 </body>
 </html>

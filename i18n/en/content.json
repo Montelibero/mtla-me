@@ -4,10 +4,12 @@
   "description": "Landing page of the Montelibero Association.",
   "currentLanguageLabel": "English",
   "languageSwitcherAriaLabel": "Language switcher",
+  "skipToContentLabel": "Skip to main content",
   "hero": {
     "title": "Montelibero Association",
     "lead": "Extraterritorial contractual jurisdiction",
     "description": "An organization created to coordinate actions towards achieving the goals of the Montelibero movement, while preserving the freedom of participants and not claiming sole representation of the Movement's interests.",
+    "navAriaLabel": "Primary links",
     "joinLabel": "Join",
     "joinHrefKey": "joinBot",
     "navLinks": [
@@ -89,6 +91,10 @@
   },
   "documents": {
     "title": "Documents and Regulations",
+    "languageNames": {
+      "en": "English",
+      "ru": "Russian"
+    },
     "items": [
       {
         "doc": "agreement",

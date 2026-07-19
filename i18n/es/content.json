@@ -4,10 +4,12 @@
   "description": "Página de destino de la Asociación Montelibero.",
   "currentLanguageLabel": "Español",
   "languageSwitcherAriaLabel": "Selector de idioma",
+  "skipToContentLabel": "Saltar al contenido principal",
   "hero": {
     "title": "Asociación Montelibero",
     "lead": "Jurisdicción contractual extraterritorial",
     "description": "Una organización creada para coordinar acciones hacia el logro de los objetivos del movimiento Montelibero, preservando la libertad de los participantes y sin reclamar representación exclusiva de los intereses del Movimiento.",
+    "navAriaLabel": "Enlaces principales",
     "joinLabel": "Unirse",
     "joinHrefKey": "joinBot",
     "navLinks": [
@@ -89,6 +91,10 @@
   },
   "documents": {
     "title": "Documentos y Reglamentos",
+    "languageNames": {
+      "en": "inglés",
+      "ru": "ruso"
+    },
     "items": [
       {
         "doc": "agreement",

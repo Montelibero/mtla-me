@@ -1,13 +1,15 @@
 {
-  "lang": "sr",
+  "lang": "cnr",
   "title": "Udruženje Montelibero",
   "description": "Početna stranica Udruženja Montelibero.",
   "currentLanguageLabel": "Crnogorski",
   "languageSwitcherAriaLabel": "Izbor jezika",
+  "skipToContentLabel": "Pređi na glavni sadržaj",
   "hero": {
     "title": "Udruženje Montelibero",
     "lead": "Vanteritorijalna ugovorna jurisdikcija",
     "description": "Udruženje stvoreno za koordinaciju akcija u postizanju ciljeva pokreta Montelibero, čuvajući slobodu učesnika i ne tražeći isključivo predstavljanje interesa Pokreta.",
+    "navAriaLabel": "Glavni linkovi",
     "joinLabel": "Pridružiti se",
     "joinHrefKey": "joinBot",
     "navLinks": [
@@ -89,6 +91,10 @@
   },
   "documents": {
     "title": "Dokumenti i propisi",
+    "languageNames": {
+      "en": "engleski",
+      "ru": "ruski"
+    },
     "items": [
       {
         "doc": "agreement",

@@ -1,48 +1,90 @@
-name: Deploy to GitHub Pages
+name: Validate and deploy GitHub Pages
 
 on:
+  pull_request:
+    branches: [v2]
   push:
     branches: [v2]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: pages-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+  validate:
+    name: Validate production artifact
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-      
-      - name: Setup Pages
-        uses: actions/configure-pages@v6
+      - name: Checkout source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
 
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Build site
-        run: npm run build
+      - name: Read approved agreement commit
+        id: agreement-source
+        shell: bash
+        run: echo "commit=$(node scripts/verify-documents.mjs --print-commit)" >> "$GITHUB_OUTPUT"
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5
+      - name: Checkout authoritative agreements
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: Montelibero/MTLA-Documents
+          ref: ${{ steps.agreement-source.outputs.commit }}
+          path: .upstream/MTLA-Documents
+          sparse-checkout: Internal/Agreement
+          persist-credentials: false
+
+      - name: Verify agreement provenance
+        run: node scripts/verify-documents.mjs --upstream-dir .upstream/MTLA-Documents
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+
+      - name: Build and test
+        run: npm run check
+
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/v2'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           path: _site
           name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
           include-hidden-files: true
+          retention-days: 1
 
-      
+  deploy:
+    name: Deploy production
+    if: github.ref == 'refs/heads/v2'
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5
         with:
           artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}

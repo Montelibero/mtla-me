@@ -1,0 +1,15 @@
+{
+  "repository": "https://github.com/Montelibero/MTLA-Documents",
+  "commit": "e138245c2316f0a4251c7ff1c2eef97f7c207638",
+  "verifiedAt": "2026-07-16",
+  "files": {
+    "Agreement.en.md": {
+      "upstreamPath": "Internal/Agreement/Agreement.en.md",
+      "sha256": "7a28fe7274696f28d4eca380de5234e186a8ff675d25fd2e454a3249721996c4"
+    },
+    "Agreement.ru.md": {
+      "upstreamPath": "Internal/Agreement/Agreement.ru.md",
+      "sha256": "389264ceb7f93bb354e6739ee8a8f330b5734b7eba2f4f20e6cd354463037093"
+    }
+  }
+}
