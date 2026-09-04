@@ -25,6 +25,12 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
       - name: Read approved agreement commit
         id: agreement-source
         shell: bash
@@ -41,12 +47,6 @@ jobs:
 
       - name: Verify agreement provenance
         run: node scripts/verify-documents.mjs --upstream-dir .upstream/MTLA-Documents
-
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version-file: .nvmrc
-          cache: npm
 
       - name: Install locked dependencies
         run: npm ci --ignore-scripts --no-audit
