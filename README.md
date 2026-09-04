@@ -68,9 +68,10 @@ Use `npm run build` when only a fresh `_site/` artifact is needed. `npm run chec
 
 ## Deployment
 
-- Merge an approved pull request into `v2` to trigger the GitHub Pages workflow; use the documented emergency exception only for an active incident
+- Merge an approved pull request into `v2` to trigger the GitHub Pages workflow
 - Production uses the custom domain `mtla.me`
 - Pull requests and pushes run the same locked build and tests; only the `v2` branch can upload and deploy `_site/`
+- The build publishes named public assets and generated pages and agent resources. Internal Markdown, local production notes, and audit reports are excluded from `_site/`.
 
 Docker preview uses the same build output:
 

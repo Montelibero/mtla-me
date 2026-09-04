@@ -73,4 +73,6 @@ The Docker image builds the same `_site/` artifact and serves it with nginx.
 
 ## Production controls
 
-The workflow validates pull requests and deploys the resulting `v2` commit using immutable action commit SHAs. Complete and record the external controls in [PRODUCTION.md](PRODUCTION.md) before treating the site as the Association's official publication.
+The workflow validates pull requests and deploys commits on `v2` using immutable action commit SHAs. Configure GitHub Pages to deploy from GitHub Actions with the custom domain `mtla.me` and HTTPS enabled. To roll back a release, revert its commit on `v2` and let the workflow rebuild and deploy the previous content.
+
+Only `_site/` is published. Repository instructions, local production notes, and audit reports are excluded from the site artifact. Keep internal approval records and production notes outside version control; the local `PRODUCTION.md` file is ignored.

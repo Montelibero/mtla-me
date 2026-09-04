@@ -119,8 +119,8 @@ Inspect the repository before answering implementation questions about the site.
 For this landing repository:
 - The public site appears static after build.
 - Locale pages are pre-rendered and served at `/en/`, `/ru/`, `/es/`, and `/sr/`.
-- The root page `/` performs a public client-side language redirect/chooser.
-- The only visible query-based behavior in the landing is the `lang` parameter on `/`, with public locale values `en`, `ru`, `es`, and `sr`.
+- The root page `/` immediately redirects using `?lang=`, then ordered browser language preferences, then English, without client-side storage. Without JavaScript, it provides manual language links.
+- The `lang` parameter accepts `en`, `ru`, `es`, `cnr`, `sr`, `bs`, and `hr`, including regional language tags. Montenegrin, Serbian, Bosnian, and Croatian preferences open `/sr/`, whose content is tagged as Montenegrin (`cnr`). Section fragments are preserved.
 - Agents may describe that visible redirect behavior, but should not invent APIs, hidden endpoints, private parameters, or undocumented workflows.
 
 ## Safety, privacy, and anti-abuse constraints
