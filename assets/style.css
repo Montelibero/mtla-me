@@ -216,6 +216,8 @@ summary.lang-current:focus-visible {
   border-radius: var(--radius-sm);
 }
 
+.lang-menu a:focus-visible { outline-offset: -3px; }
+
 header.wrap { padding: 0; height: 0; margin: 0; }
 
 .btn {
