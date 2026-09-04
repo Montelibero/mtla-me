@@ -15,7 +15,9 @@
     var normalized = normalizeTag(value);
     if (!normalized) return null;
 
-    return aliases[normalized] || aliases[normalized.split('-')[0]] || null;
+    if (Object.hasOwn(aliases, normalized)) return aliases[normalized];
+    var primaryLanguage = normalized.split('-')[0];
+    return Object.hasOwn(aliases, primaryLanguage) ? aliases[primaryLanguage] : null;
   }
 
   function resolveBrowserLocale(languages, aliases) {
@@ -28,7 +30,8 @@
 
   try {
     var config = JSON.parse(root.getAttribute('data-language-config') || '');
-    var queryLanguage = new URL(window.location.href).searchParams.get('lang');
+    var url = new URL(window.location.href);
+    var queryLanguage = url.searchParams.get('lang');
     var browserLanguages = navigator.languages && navigator.languages.length
       ? navigator.languages
       : [navigator.language];
@@ -41,7 +44,10 @@
       throw new Error('Invalid locale path.');
     }
 
-    window.location.replace(new URL('./' + localePath + '/', window.location.href).href);
+    var basePath = url.pathname.replace(/\/index\.html$/, '/');
+    url.pathname = basePath + (basePath.endsWith('/') ? '' : '/') + localePath + '/';
+    url.search = '';
+    window.location.replace(url.href);
   } catch (error) {
     root.classList.remove('redirecting');
     root.classList.add('redirect-failed');

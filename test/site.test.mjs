@@ -157,6 +157,36 @@ test('redirect honors explicit preferences, browser order, fallbacks, and the de
       languages: ['de-DE'],
       expected: 'https://example.test/project/en/',
     },
+    {
+      name: 'inherited query properties fall back to the browser preference',
+      href: 'https://example.test/project/?lang=constructor',
+      languages: ['es-ES'],
+      expected: 'https://example.test/project/es/',
+    },
+    {
+      name: 'inherited browser properties fall back to English',
+      href: 'https://example.test/project/',
+      languages: ['constructor', 'de-DE'],
+      expected: 'https://example.test/project/en/',
+    },
+    {
+      name: 'index.html preserves the base path and section while removing query parameters',
+      href: 'https://example.test/project/index.html?lang=cnr&utm_source=test#documents',
+      languages: ['en-US'],
+      expected: 'https://example.test/project/sr/#documents',
+    },
+    {
+      name: 'a base path without a trailing slash is preserved',
+      href: 'https://example.test/project?lang=ru#agreement',
+      languages: ['en-US'],
+      expected: 'https://example.test/project/ru/#agreement',
+    },
+    {
+      name: 'repeated leading slashes cannot change the redirect origin',
+      href: 'https://example.test//project/?lang=es',
+      languages: ['en-US'],
+      expected: 'https://example.test//project/es/',
+    },
   ];
 
   for (const item of cases) {
