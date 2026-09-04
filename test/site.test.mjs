@@ -278,6 +278,33 @@ test('sitemap and deploy metadata describe the canonical locale set', () => {
   assert.ok(fs.existsSync(path.join(outputDir, '.nojekyll')));
 });
 
+test('published Stellar metadata references complete, unchanged public images', () => {
+  const metadata = readBuilt('.well-known', 'stellar.toml');
+  const images = [...metadata.matchAll(/^(?:ORG_LOGO|image) = "([^"]+)"/gm)];
+  assert.ok(images.length > 0, 'expected public image references');
+
+  for (const [, href] of images) {
+    const url = new URL(href);
+    assert.equal(url.origin, SITE_ORIGIN);
+    const relativePath = decodeURIComponent(url.pathname).slice(1);
+    assert.deepEqual(
+      fs.readFileSync(path.join(outputDir, relativePath)),
+      fs.readFileSync(path.join(rootDir, relativePath)),
+      `published image must match its source: ${relativePath}`
+    );
+  }
+});
+
+test('public artifact excludes internal Markdown and publishes only declared agent skills', () => {
+  const publishedMarkdown = fs.readdirSync(outputDir, { recursive: true })
+    .filter((file) => /\.md$/i.test(file))
+    .sort();
+  const index = JSON.parse(readBuilt('.well-known', 'agent-skills', 'index.json'));
+  const declaredSkills = index.skills.map(({ url }) => new URL(url).pathname.slice(1)).sort();
+
+  assert.deepEqual(publishedMarkdown, declaredSkills);
+});
+
 function executeRedirect({ href, languages, config = redirectConfig() }) {
   const classes = new Set();
   let redirectedTo;

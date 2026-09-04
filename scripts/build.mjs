@@ -115,7 +115,10 @@ function buildSite() {
 
   copyPublicAsset('assets/style.css');
   copyPublicAsset('assets/noscript.css');
-  copyPublicAsset('.well-known');
+  copyPublicAsset('.well-known/stellar.toml');
+  copyPublicAsset('images/stellar-logo.png');
+  copyPublicAsset('images/stellar-logo-mtlap.png');
+  copyPublicAsset('images/stellar-logo-mtlac.png');
   copyPublicAsset('CNAME');
   copyPublicAsset('.nojekyll');
   copyPublicAsset('robots.txt');
@@ -614,9 +617,9 @@ function docUrl(doc, locale) {
 }
 
 function copyPublicAsset(relativePath) {
-  fs.cpSync(path.join(rootDir, relativePath), path.join(outputDir, relativePath), {
-    recursive: true,
-  });
+  const destination = path.join(outputDir, relativePath);
+  fs.mkdirSync(path.dirname(destination), { recursive: true });
+  fs.copyFileSync(path.join(rootDir, relativePath), destination);
 }
 
 function createAssetVersion(relativePaths) {
