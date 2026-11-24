@@ -2,12 +2,11 @@
 
 ## GitHub Pages
 
-This repository deploys from the `v2` branch via GitHub Actions.
+Set up the publishing path before merging into `v2`.
 
-1. Push your changes to the `v2` branch.
-2. Open **Settings → Pages**.
-3. In **Source**, select **GitHub Actions**.
-4. The workflow in `.github/workflows/deploy.yml` will build `_site/` and publish it automatically.
+1. Under **Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions**. Selecting a branch also starts GitHub's built-in publisher for its source directory.
+2. Under **Settings → Environments → github-pages**, restrict deployment branches and tags to the `v2` branch.
+3. Merge the reviewed changes into `v2`. The workflow in `.github/workflows/deploy.yml` validates the build and deploys the uploaded `_site/` artifact.
 
 The production domain for this repository is `mtla.me`. The generated locale URLs are:
 
