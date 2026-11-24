@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import vm from 'node:vm';
@@ -33,6 +35,58 @@ test('agreement sources match their recorded authoritative hashes', () => {
   const result = verifyDocumentProvenance({ rootDir });
   assert.equal(result.files.length, 2);
   assert.match(result.commit, /^[0-9a-f]{40}$/);
+});
+
+test('provenance requires both published agreements at their authoritative paths', (t) => {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mtla-provenance-'));
+  t.after(() => fs.rmSync(fixture, { recursive: true, force: true }));
+  const docs = path.join(fixture, 'documents');
+  fs.cpSync(path.join(rootDir, 'documents'), docs, { recursive: true });
+  const manifestPath = path.join(docs, 'UPSTREAM.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+
+  manifest.files['Agreement.ru.md'].upstreamPath = 'Internal/Agreement/Agreement.en.md';
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  assert.throws(() => verifyDocumentProvenance({ rootDir: fixture }), /expected Internal\/Agreement\/Agreement\.ru\.md/);
+
+  delete manifest.files['Agreement.ru.md'];
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  assert.throws(() => verifyDocumentProvenance({ rootDir: fixture }), /expected records for Agreement\.en\.md and Agreement\.ru\.md/);
+});
+
+test('upstream verification binds the working copies to the pinned commit and blobs', (t) => {
+  if (spawnSync('git', ['--version']).error?.code === 'ENOENT') return t.skip('Git is unavailable.');
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mtla-upstream-'));
+  t.after(() => fs.rmSync(fixture, { recursive: true, force: true }));
+  const git = (...args) => execFileSync('git', [
+    '-c', 'user.name=Site test', '-c', 'user.email=test@example.org',
+    '-c', 'core.hooksPath=/dev/null', '-c', 'core.autocrlf=false', '-c', 'commit.gpgSign=false', ...args,
+  ], { cwd: fixture, encoding: 'utf8' }).trim();
+  const docs = path.join(fixture, 'documents');
+  fs.cpSync(path.join(rootDir, 'documents'), docs, { recursive: true });
+  const manifestPath = path.join(docs, 'UPSTREAM.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const upstream = path.join(fixture, 'Internal', 'Agreement');
+  fs.mkdirSync(upstream, { recursive: true });
+  for (const name of Object.keys(manifest.files)) fs.copyFileSync(path.join(docs, name), path.join(upstream, name));
+  git('init', '--quiet');
+  git('add', 'Internal');
+  git('commit', '--quiet', '-m', 'Record agreements');
+  manifest.commit = git('rev-parse', 'HEAD');
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  const verify = () => verifyDocumentProvenance({ rootDir: fixture, upstreamDir: fixture });
+  assert.equal(verify().commit, manifest.commit);
+
+  const en = 'Agreement.en.md';
+  const changed = 'Revised fixture document\n';
+  fs.writeFileSync(path.join(upstream, en), changed);
+  assert.throws(verify, /does not match the recorded/);
+  fs.writeFileSync(path.join(docs, en), changed);
+  manifest.files[en].sha256 = createHash('sha256').update(changed).digest('hex');
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  assert.throws(verify, /does not match the recorded/);
+  git('commit', '--quiet', '-am', 'Revise agreement');
+  assert.throws(verify, /expected checkout at/);
 });
 
 test('agreement rendering strips active content and rejects unsafe link schemes', () => {
