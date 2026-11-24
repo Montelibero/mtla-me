@@ -1,10 +1,39 @@
-import { marked } from 'marked';
+import { Marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 import { SITE_ORIGIN } from '../site.config.mjs';
+import { parseHttpsUrl } from './html.mjs';
+
+const agreementMarkdown = new Marked({
+  extensions: [{
+    name: 'alphaList',
+    level: 'block',
+    tokenizer(source) {
+      const first = /^( {0,3})([a-z])\)(?=[ \t])/.exec(source);
+      if (!first) return;
+
+      // Normalize this marker depth so Marked can parse nested blocks.
+      const [, indent, letter] = first;
+      const [block] = source.split(new RegExp(`^ {0,${indent.length}}\\d+\\)(?=[ \\t])`, 'm'), 1);
+      const marker = new RegExp(`^${indent}[a-z]\\)(?=[ \\t])`, 'gm');
+      const normalized = block.replace(marker, `${indent}1)`);
+      const list = this.lexer.tokenizer.list(normalized);
+      if (!list) return;
+      return {
+        ...list,
+        type: 'alphaList',
+        raw: source.slice(0, list.raw.length),
+        start: letter.charCodeAt(0) - 'a'.charCodeAt(0) + 1,
+      };
+    },
+    renderer(token) {
+      return this.parser.renderer.list(token).replace('<ol', '<ol type="a"');
+    },
+  }],
+});
 
 export function renderAgreementMarkdown(markdown, { locale, russianAgreementUrl }) {
   const normalized = normalizeAgreementMarkdown(markdown, russianAgreementUrl);
-  const rendered = marked.parse(normalized, { gfm: true });
+  const rendered = agreementMarkdown.parse(normalized, { gfm: true });
   const sanitized = sanitizeHtml(rendered, {
     allowedTags: ['a', 'p', 'ol', 'ul', 'li', 'blockquote', 'em', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br'],
     allowedAttributes: {
@@ -19,11 +48,14 @@ export function renderAgreementMarkdown(markdown, { locale, russianAgreementUrl 
         const href = attribs.href || '';
         const nextAttribs = href ? { href } : {};
 
-        if (href) assertSafeAgreementHref(href, locale);
+        const url = parseHttpsUrl(href);
+        if (href && !url && !/^#[A-Za-z][A-Za-z0-9_-]*$/.test(href)) {
+          throw new Error(`Agreement.${locale}.md: link must be an absolute HTTPS URL or a fragment: ${href}`);
+        }
 
         if (href === russianAgreementUrl) nextAttribs.hreflang = 'ru';
 
-        if (isExternalHttpsUrl(href)) {
+        if (url && url.origin !== SITE_ORIGIN) {
           nextAttribs.target = '_blank';
           nextAttribs.rel = 'noopener noreferrer';
         }
@@ -37,7 +69,7 @@ export function renderAgreementMarkdown(markdown, { locale, russianAgreementUrl 
     throw new Error(`Agreement.${locale}.md: headings after the document title require an explicit template review.`);
   }
 
-  return restoreAlphaListMarkers(sanitized);
+  return sanitized;
 }
 
 function normalizeAgreementMarkdown(markdown, russianAgreementUrl) {
@@ -45,8 +77,7 @@ function normalizeAgreementMarkdown(markdown, russianAgreementUrl) {
     /\[Agreement\.ru\.md\]\(Agreement\.ru\.md\)/g,
     `[Agreement.ru.md](${russianAgreementUrl})`
   );
-  const withoutTitle = stripLeadingHeading(linked);
-  return normalizeAlphaLists(withoutTitle);
+  return stripLeadingHeading(linked);
 }
 
 function stripLeadingHeading(markdown) {
@@ -69,32 +100,4 @@ function stripLeadingHeading(markdown) {
 
   while (lines[0] === '') lines.shift();
   return lines.join('\n');
-}
-
-function normalizeAlphaLists(markdown) {
-  return markdown.replace(/^(\s+)([a-z])\)\s+/gm, '$11. ');
-}
-
-function restoreAlphaListMarkers(html) {
-  return html.replace(/(<\/p>\s*)<ol>(\s*<li>)/g, '$1<ol type="a">$2');
-}
-
-function assertSafeAgreementHref(href, locale) {
-  if (/^#[A-Za-z][A-Za-z0-9_-]*$/.test(href)) return;
-
-  try {
-    const url = new URL(href);
-    if (url.protocol !== 'https:' || url.username || url.password) throw new Error('unsafe URL');
-  } catch (_) {
-    throw new Error(`Agreement.${locale}.md: link must be an absolute HTTPS URL or a fragment: ${href}`);
-  }
-}
-
-function isExternalHttpsUrl(href) {
-  try {
-    const url = new URL(href);
-    return url.protocol === 'https:' && url.origin !== SITE_ORIGIN;
-  } catch (_) {
-    return false;
-  }
 }

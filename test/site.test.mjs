@@ -14,6 +14,8 @@ import {
   SITE_ORIGIN,
 } from '../site.config.mjs';
 import { renderAgreementMarkdown } from '../scripts/agreement.mjs';
+import { renderAnchor } from '../scripts/html.mjs';
+import { validateLinksMap, validateLocaleContent } from '../scripts/schema.mjs';
 import { verifyDocumentProvenance } from '../scripts/verify-documents.mjs';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -87,6 +89,32 @@ test('upstream verification binds the working copies to the pinned commit and bl
   assert.throws(verify, /does not match the recorded/);
   git('commit', '--quiet', '-am', 'Revise agreement');
   assert.throws(verify, /expected checkout at/);
+});
+
+test('locale and Markdown links require unambiguous targets', () => {
+  const href = 'https:docs.example.org';
+  assert.throws(() => validateLinksMap({ reference: href }, 'links.json'), /absolute HTTPS URL/);
+  assert.throws(() => renderAnchor({ href, label: 'Reference' }), /absolute HTTPS URL/);
+  assert.throws(() => renderAgreementMarkdown(`[Reference](${href})`, {
+    locale: 'en',
+    russianAgreementUrl: 'https://docs.mtla.me/Agreement/Agreement.ru.html',
+  }), /absolute HTTPS URL/);
+
+  const content = JSON.parse(readSource('i18n', 'en', 'content.json'));
+  content.hero.navLinks[0].href = null;
+  assert.throws(
+    () => validateLocaleContent(content, 'en', new Set(Object.keys(sharedLinks))),
+    /expected exactly one of "href" or "hrefKey"/
+  );
+});
+
+test('agreement clause numbers and alphabetic subclauses keep their distinct markers', () => {
+  const html = renderAgreementMarkdown(
+    'Introductory paragraph.\n\n1. Clause\n\n   a) First\n\n      1) Nested number\n\n   b) *Second*\n\n2. Next clause',
+    { locale: 'en', russianAgreementUrl: 'https://docs.mtla.me/Agreement/Agreement.ru.html' }
+  );
+  assert.deepEqual(html.match(/<ol[^>]*>/g), ['<ol>', '<ol type="a">', '<ol>']);
+  assert.match(html, /<em>Second<\/em>/);
 });
 
 test('agreement rendering strips active content and rejects unsafe link schemes', () => {

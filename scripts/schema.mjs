@@ -2,6 +2,7 @@ import {
   AGREEMENT_LOCALE_BY_SITE_LOCALE,
   SUPPORTED_LANGS as supportedLangs,
 } from '../site.config.mjs';
+import { parseHttpsUrl } from './html.mjs';
 
 const SUPPORTED_LANGS = new Set(supportedLangs);
 const DOC_LOCALES = new Set(['en', 'ru']);
@@ -237,10 +238,10 @@ function validateDocumentItem(item, path, errors) {
 }
 
 function expectExclusiveLinkTarget(value, path, hrefField, hrefKeyField, linkKeys, errors) {
-  const hasHref = typeof value[hrefField] === 'string' && value[hrefField].trim();
-  const hasHrefKey = typeof value[hrefKeyField] === 'string' && value[hrefKeyField].trim();
+  const hasHref = Object.hasOwn(value, hrefField);
+  const hasHrefKey = Object.hasOwn(value, hrefKeyField);
 
-  if (Boolean(hasHref) === Boolean(hasHrefKey)) {
+  if (hasHref === hasHrefKey) {
     errors.push(`${path}: expected exactly one of "${hrefField}" or "${hrefKeyField}".`);
     return;
   }
@@ -267,13 +268,8 @@ function expectSafeContentHref(path, value, options, errors) {
 }
 
 function expectHttpsUrl(path, value, errors) {
-  try {
-    const url = new URL(value);
-    if (url.protocol !== 'https:' || url.username || url.password) {
-      errors.push(`${path}: expected an HTTPS URL without embedded credentials.`);
-    }
-  } catch (_) {
-    errors.push(`${path}: expected a valid absolute HTTPS URL.`);
+  if (!parseHttpsUrl(value)) {
+    errors.push(`${path}: expected an absolute HTTPS URL without embedded credentials.`);
   }
 }
 

@@ -75,6 +75,12 @@ export function indentHtml(html, spaces) {
     .join('\n');
 }
 
+export function parseHttpsUrl(href) {
+  if (typeof href !== 'string' || !/^https:\/\//i.test(href) || !URL.canParse(href)) return null;
+  const url = new URL(href);
+  return url.username || url.password ? null : url;
+}
+
 function assertSafeRenderedHref(href, { external = false } = {}) {
   if (typeof href !== 'string' || !href) {
     throw new Error('Cannot render an empty link target.');
@@ -85,15 +91,9 @@ function assertSafeRenderedHref(href, { external = false } = {}) {
     return;
   }
 
-  let url;
-  try {
-    url = new URL(href);
-  } catch (_) {
-    throw new Error(`Unsafe or malformed link target: ${href}`);
-  }
-
-  if (url.protocol !== 'https:' || url.username || url.password) {
-    throw new Error(`Link target must use HTTPS without embedded credentials: ${href}`);
+  const url = parseHttpsUrl(href);
+  if (!url) {
+    throw new Error(`Link target must be an absolute HTTPS URL without embedded credentials: ${href}`);
   }
 
   if (external && url.origin === SITE_ORIGIN) {
