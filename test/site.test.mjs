@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
@@ -6,7 +7,6 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import {
   AGREEMENT_LOCALE_BY_SITE_LOCALE,
-  DEFAULT_LOCALE_KEY,
   LOCALES,
   SITE_ORIGIN,
 } from '../site.config.mjs';
@@ -15,6 +15,8 @@ import { verifyDocumentProvenance } from '../scripts/verify-documents.mjs';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outputDir = path.join(rootDir, '_site');
+const rootHtml = readBuilt('index.html');
+const redirectScript = rootHtml.match(/<script>([\s\S]*?)<\/script>/)[1];
 const sharedLinks = JSON.parse(fs.readFileSync(path.join(rootDir, 'i18n', 'links.json'), 'utf8'));
 const russianLinkKeys = [
   'associationWiki',
@@ -57,15 +59,15 @@ test('agreement rendering strips active content and rejects unsafe link schemes'
 });
 
 test('root is a no-flicker redirect with an accessible no-JavaScript fallback', () => {
-  const html = readBuilt('index.html');
-  const redirectScript = readSource('assets/redirect.js');
+  const html = rootHtml;
   const css = readSource('assets/style.css');
 
   assert.match(html, /^<!doctype html>/i);
   assert.match(html, /<html lang="en" data-language-config="[^"]+">/);
   assert.doesNotMatch(html, /<script[^>]+src=/i);
   assert.ok(html.indexOf(redirectScript.trim()) < html.indexOf('assets/style.css'));
-  assert.match(html, /script-src 'sha256-[A-Za-z0-9+/]+=*'/);
+  const digest = createHash('sha256').update(redirectScript.replace(/\r\n?/g, '\n')).digest('base64');
+  assert.ok(html.includes(`script-src 'sha256-${digest}';`));
   assert.match(css, /\.redirecting \.root-fallback\s*\{\s*display:\s*none/);
   assert.match(html, /<noscript>[\s\S]*assets\/noscript\.css/);
   assert.equal(countMatches(html, /<main\b/g), 1);
@@ -229,6 +231,7 @@ test('every locale page has consistent metadata, semantics, and safe external li
       assert.equal(countMatches(html, /<h1\b/g), 1);
       assert.equal(countMatches(html, /<meta property="og:locale:alternate"/g), LOCALES.length - 1);
       assert.doesNotMatch(html, /unsafe-inline/);
+      assert.match(html, /script-src 'none';/);
       assert.doesNotMatch(html, /\{\{/);
       assert.doesNotMatch(html, /class="doc-language" lang=/);
 
@@ -325,14 +328,22 @@ test('published Stellar metadata references complete, unchanged public images', 
   }
 });
 
-test('public artifact excludes internal Markdown and publishes only declared agent skills', () => {
-  const publishedMarkdown = fs.readdirSync(outputDir, { recursive: true })
-    .filter((file) => /\.md$/i.test(file))
-    .sort();
+test('the Pages artifact contains only the intended public files', () => {
+  const entries = fs.readdirSync(outputDir, { recursive: true, withFileTypes: true });
+  const files = entries.filter((entry) => !entry.isDirectory()).map((entry) => {
+    assert.ok(entry.isFile(), `expected a regular file: ${entry.name}`);
+    return path.relative(outputDir, path.join(entry.parentPath, entry.name)).split(path.sep).join('/');
+  });
+  const skillPath = '.well-known/agent-skills/montelibero-mtla-info/SKILL.md';
   const index = JSON.parse(readBuilt('.well-known', 'agent-skills', 'index.json'));
-  const declaredSkills = index.skills.map(({ url }) => new URL(url).pathname.slice(1)).sort();
-
-  assert.deepEqual(publishedMarkdown, declaredSkills);
+  assert.deepEqual(index.skills.map(({ url }) => url), [`${SITE_ORIGIN}/${skillPath}`]);
+  assert.deepEqual(files.sort(), [
+    '.nojekyll', '.well-known/agent-skills/index.json', skillPath, '.well-known/stellar.toml',
+    'CNAME', 'ai/summary.json', 'assets/noscript.css', 'assets/style.css', 'favicon.ico',
+    'images/stellar-logo.png', 'images/stellar-logo-mtlac.png', 'images/stellar-logo-mtlap.png',
+    'index.html', 'llms.txt', 'robots.txt', 'sitemap.xml',
+    ...LOCALES.map((locale) => `${locale.path}/index.html`),
+  ].sort());
 });
 
 function executeRedirect({ href, languages, config = redirectConfig() }) {
@@ -352,7 +363,7 @@ function executeRedirect({ href, languages, config = redirectConfig() }) {
     replace(value) { redirectedTo = value; },
   };
 
-  vm.runInNewContext(readSource('assets/redirect.js'), {
+  vm.runInNewContext(redirectScript, {
     URL,
     console: { error() {} },
     document: { documentElement: root },
@@ -364,18 +375,8 @@ function executeRedirect({ href, languages, config = redirectConfig() }) {
 }
 
 function redirectConfig() {
-  return {
-    defaultLocale: DEFAULT_LOCALE_KEY,
-    paths: Object.fromEntries(LOCALES.map(({ key, path: localePath }) => [key, localePath])),
-    queryAliases: aliasMap('queryAliases'),
-    browserAliases: aliasMap('browserAliases'),
-  };
-}
-
-function aliasMap(field) {
-  return Object.fromEntries(
-    LOCALES.flatMap((locale) => locale[field].map((alias) => [alias, locale.key]))
-  );
+  const attribute = rootHtml.match(/\bdata-language-config="([^"]+)"/)[1];
+  return JSON.parse(attribute.replaceAll('&quot;', '"'));
 }
 
 function readBuilt(...segments) {
