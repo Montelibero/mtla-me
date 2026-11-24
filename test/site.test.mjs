@@ -5,6 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { renderLocaleJsonLd } from '../scripts/metadata.mjs';
 import {
   AGREEMENT_LOCALE_BY_SITE_LOCALE,
   LOCALES,
@@ -294,6 +295,15 @@ test('English, Spanish, and Montenegrin pages embed the same English agreement',
   assert.equal(article('es'), article('en'));
   assert.equal(article('sr'), article('en'));
   assert.notEqual(article('ru'), article('en'));
+});
+
+test('embedded JSON-LD preserves literal markup in translated text', () => {
+  const title = 'Reading <HTML> and </SCRIPT> tags';
+  const json = renderLocaleJsonLd({ title, description: title }, LOCALES[0], sharedLinks);
+  assert.ok(!json.includes('<'));
+  const page = JSON.parse(json)['@graph'].find((entry) => entry['@type'] === 'WebPage');
+  assert.equal(page.name, title);
+  assert.equal(page.description, title);
 });
 
 test('sitemap and deploy metadata describe the canonical locale set', () => {

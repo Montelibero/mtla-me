@@ -145,23 +145,17 @@ function buildSite() {
 
 function writeRootIndexHtml() {
   const srcPath = path.join(rootDir, 'index.html');
-  let html = fs.readFileSync(srcPath, 'utf8');
-
-  html = html
-    .replace(/\{\{\{BUILD_SITE_ORIGIN\}\}\}/g, SITE_ORIGIN)
-    .replace('{{{BUILD_ROOT_SEO_LINKS}}}', renderRootSeoLinks())
-    .replace('{{{BUILD_LANGUAGE_CONFIG_ATTR}}}', escapeAttr(JSON.stringify(buildRedirectLanguageConfig())))
-    .replace('{{{BUILD_REDIRECT_SCRIPT_HASH}}}', escapeAttr(REDIRECT_SCRIPT_HASH))
-    .replace('{{{BUILD_REDIRECT_SCRIPT}}}', INLINE_REDIRECT_SCRIPT)
-    .replace(/\{\{\{BUILD_ASSET_VERSION\}\}\}/g, ASSET_VERSION)
-    .replace('{{{BUILD_ROOT_HREFLANG_LINKS}}}', renderRootHreflangLinks())
-    .replace('{{{BUILD_ROOT_JSON_LD}}}', renderRootJsonLd(sharedLinks))
-    .replace(/\{\{\{BUILD_MANUAL_LANG_LINKS\}\}\}/g, renderManualLanguageLinks());
-
-  if (html.includes('{{{BUILD_')) {
-    throw new Error('index.html: unreplaced BUILD_* placeholder(s) remain after build');
-  }
-
+  const html = renderTemplate(fs.readFileSync(srcPath, 'utf8'), {
+    BUILD_SITE_ORIGIN: escapeAttr(SITE_ORIGIN),
+    BUILD_ROOT_SEO_LINKS: renderRootSeoLinks(),
+    BUILD_LANGUAGE_CONFIG_ATTR: escapeAttr(JSON.stringify(buildRedirectLanguageConfig())),
+    BUILD_REDIRECT_SCRIPT_HASH: escapeAttr(REDIRECT_SCRIPT_HASH),
+    BUILD_REDIRECT_SCRIPT: INLINE_REDIRECT_SCRIPT,
+    BUILD_ASSET_VERSION: ASSET_VERSION,
+    BUILD_ROOT_HREFLANG_LINKS: renderRootHreflangLinks(),
+    BUILD_ROOT_JSON_LD: renderRootJsonLd(sharedLinks),
+    BUILD_MANUAL_LANG_LINKS: renderManualLanguageLinks(),
+  });
   fs.writeFileSync(path.join(outputDir, 'index.html'), html);
 }
 
