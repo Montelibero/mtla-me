@@ -1,0 +1,6 @@
+* text=auto eol=lf
+
+# Compare the exact bytes supplied by the authoritative repository.
+documents/Agreement.*.md -text
+*.png binary
+*.ico binary

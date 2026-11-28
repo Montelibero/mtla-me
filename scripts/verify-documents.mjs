@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -13,10 +14,17 @@ export function verifyDocumentProvenance({ rootDir = defaultRootDir, upstreamDir
 
   validateManifest(manifest, manifestPath);
 
+  if (upstreamDir) {
+    const head = execFileSync('git', ['-C', upstreamDir, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+    if (head !== manifest.commit) {
+      throw new Error(`${upstreamDir}: expected checkout at ${manifest.commit}, found ${head}.`);
+    }
+  }
+
   const verifiedFiles = [];
   for (const [localName, source] of Object.entries(manifest.files)) {
     const localPath = path.join(rootDir, 'documents', localName);
-    const actualHash = sha256(localPath);
+    const actualHash = sha256(fs.readFileSync(localPath));
 
     if (actualHash !== source.sha256) {
       throw new Error(
@@ -26,9 +34,11 @@ export function verifyDocumentProvenance({ rootDir = defaultRootDir, upstreamDir
     }
 
     if (upstreamDir) {
-      const upstreamPath = resolveContainedPath(upstreamDir, source.upstreamPath);
-      const upstreamHash = sha256(upstreamPath);
-      if (upstreamHash !== source.sha256) {
+      const upstreamPath = path.join(upstreamDir, source.upstreamPath);
+      const blob = execFileSync('git', [
+        '--no-replace-objects', '-C', upstreamDir, 'cat-file', 'blob', `${manifest.commit}:${source.upstreamPath}`,
+      ]);
+      if (sha256(blob) !== source.sha256 || sha256(fs.readFileSync(upstreamPath)) !== source.sha256) {
         throw new Error(
           `${upstreamPath}: does not match the recorded ${manifest.commit} document hash ${source.sha256}.`
         );
@@ -72,20 +82,19 @@ function validateManifest(manifest, manifestPath) {
     throw new Error(`${manifestPath}.repository: expected ${EXPECTED_REPOSITORY}.`);
   }
 
-  if (!/^[0-9a-f]{40}$/.test(manifest.commit)) {
+  if (typeof manifest.commit !== 'string' || !/^[0-9a-f]{40}$/.test(manifest.commit)) {
     throw new Error(`${manifestPath}.commit: expected a full 40-character Git commit SHA.`);
   }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(manifest.verifiedAt)) {
+  if (typeof manifest.verifiedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(manifest.verifiedAt)) {
     throw new Error(`${manifestPath}.verifiedAt: expected YYYY-MM-DD.`);
   }
-  if (!isPlainObject(manifest.files) || Object.keys(manifest.files).length === 0) {
-    throw new Error(`${manifestPath}.files: expected at least one document record.`);
+  const documentNames = ['Agreement.en.md', 'Agreement.ru.md'];
+  if (!isPlainObject(manifest.files) || Object.keys(manifest.files).length !== documentNames.length ||
+      !documentNames.every((name) => Object.hasOwn(manifest.files, name))) {
+    throw new Error(`${manifestPath}.files: expected records for ${documentNames.join(' and ')}.`);
   }
 
   for (const [localName, source] of Object.entries(manifest.files)) {
-    if (path.basename(localName) !== localName || !/^Agreement\.(?:en|ru)\.md$/.test(localName)) {
-      throw new Error(`${manifestPath}.files.${localName}: unexpected local document name.`);
-    }
     if (!isPlainObject(source)) {
       throw new Error(`${manifestPath}.files.${localName}: expected an object.`);
     }
@@ -94,32 +103,18 @@ function validateManifest(manifest, manifestPath) {
     if (sourceKeys.join('\0') !== ['sha256', 'upstreamPath'].join('\0')) {
       throw new Error(`${manifestPath}.files.${localName}: expected only sha256 and upstreamPath.`);
     }
-    if (!/^[0-9a-f]{64}$/.test(source.sha256)) {
+    if (typeof source.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(source.sha256)) {
       throw new Error(`${manifestPath}.files.${localName}.sha256: expected a lowercase SHA-256 digest.`);
     }
-    if (
-      typeof source.upstreamPath !== 'string' ||
-      source.upstreamPath.startsWith('/') ||
-      source.upstreamPath.split('/').some((segment) => !segment || segment === '.' || segment === '..')
-    ) {
-      throw new Error(`${manifestPath}.files.${localName}.upstreamPath: expected a safe repository-relative path.`);
+    const expectedPath = `Internal/Agreement/${localName}`;
+    if (source.upstreamPath !== expectedPath) {
+      throw new Error(`${manifestPath}.files.${localName}.upstreamPath: expected ${expectedPath}.`);
     }
   }
 }
 
-function resolveContainedPath(baseDir, relativePath) {
-  const base = path.resolve(baseDir);
-  const candidate = path.resolve(base, relativePath);
-  const relative = path.relative(base, candidate);
-
-  if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) {
-    throw new Error(`Upstream path escapes its repository root: ${relativePath}`);
-  }
-  return candidate;
-}
-
-function sha256(filePath) {
-  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+function sha256(bytes) {
+  return crypto.createHash('sha256').update(bytes).digest('hex');
 }
 
 function isPlainObject(value) {

@@ -150,7 +150,7 @@ function buildWebSiteEntity() {
 
 function stringifyJsonLdGraph(graph) {
   return indentHtml(
-    JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }, null, 2).replace(/<\/script/gi, '<\\/script'),
+    JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }, null, 2).replaceAll('<', '\\u003c'),
     4
   );
 }

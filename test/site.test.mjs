@@ -1,20 +1,27 @@
 import assert from 'node:assert/strict';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { renderLocaleJsonLd } from '../scripts/metadata.mjs';
 import {
   AGREEMENT_LOCALE_BY_SITE_LOCALE,
-  DEFAULT_LOCALE_KEY,
   LOCALES,
   SITE_ORIGIN,
 } from '../site.config.mjs';
 import { renderAgreementMarkdown } from '../scripts/agreement.mjs';
+import { renderAnchor } from '../scripts/html.mjs';
+import { validateLinksMap, validateLocaleContent } from '../scripts/schema.mjs';
 import { verifyDocumentProvenance } from '../scripts/verify-documents.mjs';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outputDir = path.join(rootDir, '_site');
+const rootHtml = readBuilt('index.html');
+const redirectScript = rootHtml.match(/<script>([\s\S]*?)<\/script>/)[1];
 const sharedLinks = JSON.parse(fs.readFileSync(path.join(rootDir, 'i18n', 'links.json'), 'utf8'));
 const russianLinkKeys = [
   'associationWiki',
@@ -30,6 +37,84 @@ test('agreement sources match their recorded authoritative hashes', () => {
   const result = verifyDocumentProvenance({ rootDir });
   assert.equal(result.files.length, 2);
   assert.match(result.commit, /^[0-9a-f]{40}$/);
+});
+
+test('provenance requires both published agreements at their authoritative paths', (t) => {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mtla-provenance-'));
+  t.after(() => fs.rmSync(fixture, { recursive: true, force: true }));
+  const docs = path.join(fixture, 'documents');
+  fs.cpSync(path.join(rootDir, 'documents'), docs, { recursive: true });
+  const manifestPath = path.join(docs, 'UPSTREAM.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+
+  manifest.files['Agreement.ru.md'].upstreamPath = 'Internal/Agreement/Agreement.en.md';
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  assert.throws(() => verifyDocumentProvenance({ rootDir: fixture }), /expected Internal\/Agreement\/Agreement\.ru\.md/);
+
+  delete manifest.files['Agreement.ru.md'];
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  assert.throws(() => verifyDocumentProvenance({ rootDir: fixture }), /expected records for Agreement\.en\.md and Agreement\.ru\.md/);
+});
+
+test('upstream verification binds the working copies to the pinned commit and blobs', (t) => {
+  if (spawnSync('git', ['--version']).error?.code === 'ENOENT') return t.skip('Git is unavailable.');
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mtla-upstream-'));
+  t.after(() => fs.rmSync(fixture, { recursive: true, force: true }));
+  const git = (...args) => execFileSync('git', [
+    '-c', 'user.name=Site test', '-c', 'user.email=test@example.org',
+    '-c', 'core.hooksPath=/dev/null', '-c', 'core.autocrlf=false', '-c', 'commit.gpgSign=false', ...args,
+  ], { cwd: fixture, encoding: 'utf8' }).trim();
+  const docs = path.join(fixture, 'documents');
+  fs.cpSync(path.join(rootDir, 'documents'), docs, { recursive: true });
+  const manifestPath = path.join(docs, 'UPSTREAM.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const upstream = path.join(fixture, 'Internal', 'Agreement');
+  fs.mkdirSync(upstream, { recursive: true });
+  for (const name of Object.keys(manifest.files)) fs.copyFileSync(path.join(docs, name), path.join(upstream, name));
+  git('init', '--quiet');
+  git('add', 'Internal');
+  git('commit', '--quiet', '-m', 'Record agreements');
+  manifest.commit = git('rev-parse', 'HEAD');
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  const verify = () => verifyDocumentProvenance({ rootDir: fixture, upstreamDir: fixture });
+  assert.equal(verify().commit, manifest.commit);
+
+  const en = 'Agreement.en.md';
+  const changed = 'Revised fixture document\n';
+  fs.writeFileSync(path.join(upstream, en), changed);
+  assert.throws(verify, /does not match the recorded/);
+  fs.writeFileSync(path.join(docs, en), changed);
+  manifest.files[en].sha256 = createHash('sha256').update(changed).digest('hex');
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  assert.throws(verify, /does not match the recorded/);
+  git('commit', '--quiet', '-am', 'Revise agreement');
+  assert.throws(verify, /expected checkout at/);
+});
+
+test('locale and Markdown links require unambiguous targets', () => {
+  const href = 'https:docs.example.org';
+  assert.throws(() => validateLinksMap({ reference: href }, 'links.json'), /absolute HTTPS URL/);
+  assert.throws(() => renderAnchor({ href, label: 'Reference' }), /absolute HTTPS URL/);
+  assert.throws(() => renderAgreementMarkdown(`[Reference](${href})`, {
+    locale: 'en',
+    russianAgreementUrl: 'https://docs.mtla.me/Agreement/Agreement.ru.html',
+  }), /absolute HTTPS URL/);
+
+  const content = JSON.parse(readSource('i18n', 'en', 'content.json'));
+  content.hero.navLinks[0].href = null;
+  assert.throws(
+    () => validateLocaleContent(content, 'en', new Set(Object.keys(sharedLinks))),
+    /expected exactly one of "href" or "hrefKey"/
+  );
+});
+
+test('agreement clause numbers and alphabetic subclauses keep their distinct markers', () => {
+  const html = renderAgreementMarkdown(
+    'Introductory paragraph.\n\n1. Clause\n\n   a) First\n\n      1) Nested number\n\n   b) *Second*\n\n2. Next clause',
+    { locale: 'en', russianAgreementUrl: 'https://docs.mtla.me/Agreement/Agreement.ru.html' }
+  );
+  assert.deepEqual(html.match(/<ol[^>]*>/g), ['<ol>', '<ol type="a">', '<ol>']);
+  assert.match(html, /<em>Second<\/em>/);
 });
 
 test('agreement rendering strips active content and rejects unsafe link schemes', () => {
@@ -57,15 +142,15 @@ test('agreement rendering strips active content and rejects unsafe link schemes'
 });
 
 test('root is a no-flicker redirect with an accessible no-JavaScript fallback', () => {
-  const html = readBuilt('index.html');
-  const redirectScript = readSource('assets/redirect.js');
+  const html = rootHtml;
   const css = readSource('assets/style.css');
 
   assert.match(html, /^<!doctype html>/i);
   assert.match(html, /<html lang="en" data-language-config="[^"]+">/);
   assert.doesNotMatch(html, /<script[^>]+src=/i);
   assert.ok(html.indexOf(redirectScript.trim()) < html.indexOf('assets/style.css'));
-  assert.match(html, /script-src 'sha256-[A-Za-z0-9+/]+=*'/);
+  const digest = createHash('sha256').update(redirectScript.replace(/\r\n?/g, '\n')).digest('base64');
+  assert.ok(html.includes(`script-src 'sha256-${digest}';`));
   assert.match(css, /\.redirecting \.root-fallback\s*\{\s*display:\s*none/);
   assert.match(html, /<noscript>[\s\S]*assets\/noscript\.css/);
   assert.equal(countMatches(html, /<main\b/g), 1);
@@ -229,6 +314,7 @@ test('every locale page has consistent metadata, semantics, and safe external li
       assert.equal(countMatches(html, /<h1\b/g), 1);
       assert.equal(countMatches(html, /<meta property="og:locale:alternate"/g), LOCALES.length - 1);
       assert.doesNotMatch(html, /unsafe-inline/);
+      assert.match(html, /script-src 'none';/);
       assert.doesNotMatch(html, /\{\{/);
       assert.doesNotMatch(html, /class="doc-language" lang=/);
 
@@ -293,6 +379,15 @@ test('English, Spanish, and Montenegrin pages embed the same English agreement',
   assert.notEqual(article('ru'), article('en'));
 });
 
+test('embedded JSON-LD preserves literal markup in translated text', () => {
+  const title = 'Reading <HTML> and </SCRIPT> tags';
+  const json = renderLocaleJsonLd({ title, description: title }, LOCALES[0], sharedLinks);
+  assert.ok(!json.includes('<'));
+  const page = JSON.parse(json)['@graph'].find((entry) => entry['@type'] === 'WebPage');
+  assert.equal(page.name, title);
+  assert.equal(page.description, title);
+});
+
 test('sitemap and deploy metadata describe the canonical locale set', () => {
   const sitemap = readBuilt('sitemap.xml');
   const robots = readBuilt('robots.txt');
@@ -325,14 +420,22 @@ test('published Stellar metadata references complete, unchanged public images', 
   }
 });
 
-test('public artifact excludes internal Markdown and publishes only declared agent skills', () => {
-  const publishedMarkdown = fs.readdirSync(outputDir, { recursive: true })
-    .filter((file) => /\.md$/i.test(file))
-    .sort();
+test('the Pages artifact contains only the intended public files', () => {
+  const entries = fs.readdirSync(outputDir, { recursive: true, withFileTypes: true });
+  const files = entries.filter((entry) => !entry.isDirectory()).map((entry) => {
+    assert.ok(entry.isFile(), `expected a regular file: ${entry.name}`);
+    return path.relative(outputDir, path.join(entry.parentPath, entry.name)).split(path.sep).join('/');
+  });
+  const skillPath = '.well-known/agent-skills/montelibero-mtla-info/SKILL.md';
   const index = JSON.parse(readBuilt('.well-known', 'agent-skills', 'index.json'));
-  const declaredSkills = index.skills.map(({ url }) => new URL(url).pathname.slice(1)).sort();
-
-  assert.deepEqual(publishedMarkdown, declaredSkills);
+  assert.deepEqual(index.skills.map(({ url }) => url), [`${SITE_ORIGIN}/${skillPath}`]);
+  assert.deepEqual(files.sort(), [
+    '.nojekyll', '.well-known/agent-skills/index.json', skillPath, '.well-known/stellar.toml',
+    'CNAME', 'ai/summary.json', 'assets/noscript.css', 'assets/style.css', 'favicon.ico',
+    'images/stellar-logo.png', 'images/stellar-logo-mtlac.png', 'images/stellar-logo-mtlap.png',
+    'index.html', 'llms.txt', 'robots.txt', 'sitemap.xml',
+    ...LOCALES.map((locale) => `${locale.path}/index.html`),
+  ].sort());
 });
 
 function executeRedirect({ href, languages, config = redirectConfig() }) {
@@ -352,7 +455,7 @@ function executeRedirect({ href, languages, config = redirectConfig() }) {
     replace(value) { redirectedTo = value; },
   };
 
-  vm.runInNewContext(readSource('assets/redirect.js'), {
+  vm.runInNewContext(redirectScript, {
     URL,
     console: { error() {} },
     document: { documentElement: root },
@@ -364,18 +467,8 @@ function executeRedirect({ href, languages, config = redirectConfig() }) {
 }
 
 function redirectConfig() {
-  return {
-    defaultLocale: DEFAULT_LOCALE_KEY,
-    paths: Object.fromEntries(LOCALES.map(({ key, path: localePath }) => [key, localePath])),
-    queryAliases: aliasMap('queryAliases'),
-    browserAliases: aliasMap('browserAliases'),
-  };
-}
-
-function aliasMap(field) {
-  return Object.fromEntries(
-    LOCALES.flatMap((locale) => locale[field].map((alias) => [alias, locale.key]))
-  );
+  const attribute = rootHtml.match(/\bdata-language-config="([^"]+)"/)[1];
+  return JSON.parse(attribute.replaceAll('&quot;', '"'));
 }
 
 function readBuilt(...segments) {
